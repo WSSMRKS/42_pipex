@@ -1,0 +1,46 @@
+Pipex subject infos:
+
+Program name                                    pipex
+Turn in files                                   Makefile, *.h, *.c
+Makefile                                        NAME, all, clean, fclean, re
+Arguments                                       file1 cmd1 cmd2 file2
+External functs.
+                                                open, close, read, write,
+                                                malloc, free, perror,
+                                                strerror, access, dup, dup2,
+                                                execve, exit, fork, pipe,
+                                                unlink, wait, waitpid
+                                                ft_printf and any equivalent
+                                                YOU coded
+Libft authorized                                Yes
+Description                                     This project is about handling pipes.
+
+Program execution:
+./pipex file1 cmd1 cmd2 file2
+
+it must take 4 arguments:
+    file1 and file2 are filenames.
+    cmd1 and cmd2 are shell commands with their parameters
+
+Program must behave exactly the same as:
+$> < file1 cmd1 | cmd3 > file2
+
+Examples:
+$> ./pipex infile "ls -l" "wc -l" outfile
+shell equivalent:
+< infile ls -l | wc -l > outfile
+
+$> ./pipex infile "grep a1" "wc -w" outfile
+shell equivalent:
+< infile grep a1 | wc -w > outfile
+
+error handling same as shell 
+
+Bonus:
+support multiple Pipes.
+Support << and >> when the first Parameter is "here_doc".
+
+This:
+./pipex here_doc LIMITER cmd cmd1 file1
+Should behave like this:
+cmd << LIMITER | cmd1 >> file
