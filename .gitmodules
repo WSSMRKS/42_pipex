@@ -1,8 +1,0 @@
-[submodule "libft"]
-	path = libft
-	url = git@github.com:WSSMRKS/42_libft.git
-	branch = main
-[submodule "42_pipex_tester"]
-	path = 42_pipex_tester
-	url = git@github.com:WSSMRKS/42_pipex_tester.git
-	branch = main
