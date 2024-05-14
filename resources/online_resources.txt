@@ -1,3 +1,0 @@
-Heredoc examples:
-
-https://linuxize.com/post/bash-heredoc/
