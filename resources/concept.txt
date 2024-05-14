@@ -12,6 +12,108 @@ External functs.
                                                 unlink, wait, waitpid
                                                 ft_printf and any equivalent
                                                 YOU coded
+
+Details to allowed functs.:
+
+open		int open(const char *pathname, int flags);
+	open & create files. also open pipe;
+	library: #include <fnctl.h> / <sys/stat.h>;
+
+close		int close(int fd);
+	close fds. (important to make grep not read anymore from pipe)
+	ibrary: #include <unistd.h>;
+
+read		ssize_t read(int fd, void *buf, size_t count);
+	read from fd.
+	*buf:		adresse in memory to read to.
+	count:		number of bytes to read. -->use sizeof();
+	library:	#include <unistd.h>;
+
+write		ssize_t write(int fd, const void *buf, size_t count);
+	write to fd.
+	*buf:		adresse in memory to read to.
+	count:		number of bytes to read. -->use sizeof();
+	library:	#include <unistd.h>;
+
+malloc	bekannt;
+
+free	bekannt;
+
+perror		void perror(const char *s);
+	produce a message on stderror according to the errorcode of a function to print with ft_printf or ft_printf_err;
+	list of errors: 	"errno -l"
+	library:			#include <stdio.h>;
+
+strerror	char *strerror(int errnum);
+	give a pointer to a string with the description of an errorcode.
+	library:			#include <string.h>
+
+access		int access(const char *pathname, int mode);
+	checks if the calling process can access the file. specified in *pathname;
+	mode:				X_OK	file exists + execute permissions?
+						R_OK	file exists + read permissions?
+						W_OK	file exists + write permissions?
+	library:			#include <unistd.h>
+
+dup			int dup(int oldfd);
+	takes an old fd and creates a new fd with the lowest free fd-number. fds can be used interchangeably.
+	Library:			#include <unistd.h>
+
+dup2		int dup2(int oldfd, int newfd);
+	takes an old fd and duplicates it to the fd given as argument "newfd".
+	Is used to assign STDIN_FILENO or STDOUT_FILENO to the pipe.
+	remember to close the additional filedescriptors.
+	Library:			#include <unistd.h>
+
+execve		int execve(const char *pathname, char *const argv[], char *const envp[]);
+	execute the program referred to by pathname. Causes the program that is currently running to be replaced by the called process.
+	arguments:			*pathname	path to program/process
+						char **argv	NULL terminated. Command line args of the program
+						char **envp	NULL Terminated. is the environment of the program.
+	Library:			#inlcude <unistd.h>
+
+exit		bekannt;
+
+fork		pid_t fork(void)
+	forking a program in processes.
+	pid 0 = child
+	pit >0 = parent
+	pid <0 = error.
+	Library:			#inlcude <unistd.h>
+
+pipe		int pipe(int fildes[2]);
+	pipe information from one process to another with a temorary file in memory.
+	write end of the pipe 	--> fd[1]
+	read end of the pipe	--> fd[0]
+	wait is necessary to get the propper results from child.
+	Library:	#include <unistd.h>
+
+unlink		int unlink(const char *pathname);
+	deletes a name from the filesystem and deletes the file if this was the last link to the file and the file is not open by any processes.
+	if file is still used by a process it is deleted when the last fd is closed.
+	if the name referred to a symlink the link is removed.
+	Library:	#include <unistd.h>
+
+wait		pid_t wait(int *stat_loc);
+waitpid		pid_t waitpid(pid_t pid, int *stat_loc, int options);
+	wait is waiting for a child process to finish processing.
+	wait --> any child process;
+	waitpid --> specific child process;
+	waitpid args:
+			*stat_loc	regularly NULL some additional tests.
+			options		regularly 0 some additional options.
+
+
+
+
+
+
+
+
+
+
+
+
 Libft authorized                                Yes
 Description                                     This project is about handling pipes.
 
@@ -34,7 +136,7 @@ $> ./pipex infile "grep a1" "wc -w" outfile
 shell equivalent:
 < infile grep a1 | wc -w > outfile
 
-error handling same as shell 
+error handling same as shell
 
 Bonus:
 support multiple Pipes.
