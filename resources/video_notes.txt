@@ -1,0 +1,30 @@
+Video research
+
+https://www.youtube.com/watch?v=6u_iPGVkfZ4&list=PLK4FY1IoDcHG-jUt93Cl7n7XLQDZ0q7Tv&index=3
+
+fork is splitting the process in two. id of child = 0 id of parent = x
+another fork is splitting again.
+
+Wait only waits for one child process to finish. --> solution: bind fork on id beeing 0 ?
+while (wait(NULL) || errno != ECHILD) --> ERRNO NOT ALLOWED
+{
+	printf("waited for a child to finish\n");
+}
+
+
+Processes important to make use of multithreading.
+
+pipe(): File in the memory used to communicate between processes.
+prototype:
+pipe(int __pipedes[2]);
+fd is the key to the file.
+if (fd == 0)
+{
+	printf("success!\n");
+}
+else if (fd == -1)
+{
+	printf("error!\n");
+}
+
+Filedescriptor is process dependent. so closing in one process does not terminate it.
