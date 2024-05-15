@@ -1,0 +1,25 @@
+Pipex: execute shell commands inside a program
+
+pipex syntax:
+./pipex file1 "ls -l" "wc -l" file2
+
+input checks:
+	is file1 a valid adress? (not necessarily folder is fine as well)
+											No?-->		no such file or directory: blaa
+	do i have permissions? 					No?-->		Permission denied: bla
+	is ls a process in envp $PATH? 			No?-->		command not found: tsd
+	are the flags valid?					No?-->		invalid option -- 'z'
+	-->	process process, parse through pipe;
+2nd Command:
+	is ls a process in envp $PATH? 			No?-->		command not found: tsd
+	are the flags valid?					No?-->		invalid option -- 'z'
+	is file2 a valid adress?				No?-->		create file
+	Is file2 a folder?						No?-->
+	--> process process, save to file
+
+Bonus:
+	enable several commands
+	enable heredoc --> read from file up to a particular delimiter.
+
+
+

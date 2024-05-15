@@ -1,0 +1,9 @@
+pipex:
+
+main:
+validate args?
+file1 test with access? test with open. --> open
+if here_doc is set read only up to delimiter.
+if
+perror --> open retval.
+

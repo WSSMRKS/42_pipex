@@ -104,9 +104,17 @@ waitpid		pid_t waitpid(pid_t pid, int *stat_loc, int options);
 			options		regularly 0 some additional options.
 
 
+Bonus:
+Here_doc https://linuxize.com/post/bash-heredoc/
 
+bonus one:
+	make an unlimited amount of commands possible.
+	child creates child creates child creates child ,...
 
-
+read from here_doc with delimiter.
+	syntax: ./pipex here_doc LIMITER cmd cmd1 file
+	adjust gnl to close and free after delimiter is found
+	append to file (open file with Append flag.)
 
 
 
