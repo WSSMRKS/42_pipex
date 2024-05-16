@@ -2,5 +2,15 @@ f1 cmd1 cmd2 f2						argc = 5
 f1 cmd1 cmd2 cmd3 cmd4 cmd5 f2	 	argc = 8
 f1 cmd1 cmd2 cmd3 f2	 			argc = 6
 f1 cmd1 cmd2 cmd3 cmd4 f2	 		argc = 7
-here_doc delimiter cmd cmd1 f2		argc = 6
+here_doc delimiter cmd cmd1 f2		argc = 6 		special case!!
 if argc < 5 wrong number of arguments
+
+
+
+parent 
+--> child1 (last arg > file2) 
+--> child2 (n arg)
+--> child3 (file1 + first arg)
+
+pipe
+dup2
