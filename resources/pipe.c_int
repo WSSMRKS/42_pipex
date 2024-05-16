@@ -1,0 +1,14 @@
+int	main(int argc, char **argv)
+	int	fd[2];
+	int	pid1;
+	int	pid2;
+	int	calc1;
+	int	calc2;
+	int	part_sum1;
+	int	part_sum2;
+	int	sum;
+		printf("I am child 1\n");
+			printf("I am child 2\n");
+			printf("I am child 1 again\n");
+			printf("waiting for child process 2\n");
+		printf("the sums are:\npart_sum1: %d\npart_sum2: %d\nsum: %d\n",

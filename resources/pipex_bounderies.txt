@@ -3,6 +3,12 @@ Pipex: execute shell commands inside a program
 pipex syntax:
 ./pipex file1 "ls -l" "wc -l" file2
 
+./pipex here_doc delimiter cmd2 file2
+
+./pipex file1 cmd1 cmd2 cmdn file 2
+
+
+
 input checks:
 	is file1 a valid adress? (not necessarily folder is fine as well)
 											No?-->		no such file or directory: blaa
