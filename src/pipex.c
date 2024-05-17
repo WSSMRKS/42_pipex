@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 09:54:20 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/17 17:12:34 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/17 20:37:27 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,33 +31,34 @@ void	ft_cmd_first(t_pipex *pipex, int argc_l)
 	char	*ppath;
 	char	**cmd;
 	int		infile;
+	int		sux;
 
 	i = 0;
+	sux = -1;
 	cmd = ft_split(pipex->argv[argc_l - 1], ' ');
 	ft_lstadd_back(&pipex->free, ft_pipex_lstnew(cmd, 2));
 	while (pipex->path[i])
 	{
 		ppath = ft_strjoin(pipex->path[i], cmd[0]);
-		if (access(ppath, X_OK) == 0)
+		sux = access(ppath, X_OK);
+		if (sux == 0)
 			break ;
 		free(ppath);
 		ppath = NULL;
 		i++;
 	}
-	if (ppath == NULL)
-		ft_lstadd_back(&pipex->free, ft_pipex_lstnew(ppath, 1));
 	// if (ft_strncmp(pipex->argv[1], "here_doc", 8 == 0))
 	// 	ft_here_doc();
-	// else
-	// {
 	infile = open(pipex->argv[1], O_RDONLY);
+	if (infile < 0)
+		perror("pipex");
 	dup2(infile, STDIN_FILENO);
 	dup2(pipex->pipe1[1], STDOUT_FILENO);
 	close(infile);
 	close(pipex->pipe1[0]);
 	close(pipex->pipe1[1]);
-	execve(ppath, &cmd[1], pipex->envp);
-	// }
+	if (infile > 0)
+		execve(ppath, &pipex->argv[1], pipex->envp);
 }
 
 void	ft_child(t_pipex *pipex)
@@ -113,7 +114,7 @@ void	ft_cmd_n(t_pipex *pipex, int argc_l)
 	close(pipex->pipe1[1]);
 	if (ppath == NULL)
 		ft_lstadd_back(&pipex->free, ft_pipex_lstnew(ppath, 1));
-	execve(ppath, &cmd[1], pipex->envp);
+	execve(ppath, &pipex->argv[argc_l - 3], pipex->envp);
 	strerror(2);
 }
 
@@ -147,30 +148,34 @@ void	ft_cmd_last(t_pipex *pipex, int argc_l)
 	char	*ppath;
 	char	**cmd;
 	int		outfile;
+	int		sux;
 
+	printf("we are here3\n");
 	i = 0;
+	sux = -1;
 	cmd = ft_split(pipex->argv[argc_l - 2], ' ');
 	ft_lstadd_back(&pipex->free, ft_pipex_lstnew(cmd, 2));
 	while (pipex->path[i])
 	{
 		ppath = ft_strjoin(pipex->path[i], cmd[0]);
-		if (access(ppath, X_OK) == 0)
+		sux = access(ppath, X_OK);
+		if (sux == 0)
 			break ;
 		free(ppath);
 		ppath = NULL;
 		i++;
 	}
-	ft_lstadd_back(&pipex->free, ft_pipex_lstnew(ppath, 1));
-	if (pipex->here_doc == 1)
-		outfile = open(pipex->argv[argc_l - 1], O_APPEND | O_CREAT, 0777);
-	else
-		outfile = open(pipex->argv[1], O_TRUNC | O_CREAT, 0777);
+	printf("we are here4\n");
+	outfile = open(pipex->argv[argc_l - 1], O_TRUNC | O_CREAT, 0777);
+	printf("we are here4,5\n");
 	dup2(outfile, STDOUT_FILENO);
 	dup2(pipex->pipe1[0], STDIN_FILENO);
+	printf("we are here5\n");
 	close(outfile);
 	close(pipex->pipe1[0]);
 	close(pipex->pipe1[1]);
-	execve(ppath, &cmd[1], pipex->envp);
+	printf("we are here6\n");
+	execve(ppath, &pipex->argv[argc_l - 1], pipex->envp);
 }
 
 char	**ft_grab_envp(char **envp)
@@ -222,7 +227,7 @@ int	main(int argc, char **argv, char **envp)
 
 	i = 0;
 	if (argc < 5)
-		ft_printf_err("Error: Wrong number of arguments");
+		ft_printf_err("Error: Wrong number of arguments\n");
 	else
 	{
 		ft_init_env(&pipex, &argc, argv, envp);
