@@ -1,3 +1,8 @@
+# solve relink issues
+
+
+
+
 # Directories #
 SRCDIR = src/
 HDRDIR = inc/

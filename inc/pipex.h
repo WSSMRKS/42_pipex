@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/17 11:55:24 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/17 16:55:57 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <fcntl.h>
+# include <string.h>
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 100
@@ -45,13 +46,13 @@ typedef struct s_pipex {
 	char	**path;
 	char	**envp;
 	char	**argv;
-	int		*argc;
-	int		pipe0[2];
+	int		argc;
 	int		pipe1[2];
 	t_list	*free;
 	int		here_doc;
 }				t_pipex;
 
+// libft
 int		ft_atoi(const char *nptr);
 long	ft_atol(const char *nptr);
 int		ft_countwords(char const *str, char c);
@@ -106,5 +107,15 @@ int		ft_putchar_fd_ret(char c, int fd);
 char	*ft_get_next_line(int fd);
 void	ft_putstr_non_printable(char *str, size_t n);
 int		ft_abs(int a);
+
+// pipex
+t_list	*ft_pipex_lstnew(void *cont, int type);
+void	ft_cmd_first(t_pipex *pipex, int argc_l);
+void	ft_child(t_pipex *pipex);
+void	ft_cmd_n(t_pipex *pipex, int argc_l);
+void	ft_parent_process(t_pipex *pipex);
+void	ft_cmd_last(t_pipex *pipex, int argc_l);
+char	**ft_grab_envp(char **envp);
+void	ft_init_env(t_pipex *ipex, int *argc, char **argv, char **envp);
 
 #endif

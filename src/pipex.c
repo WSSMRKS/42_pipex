@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 09:54:20 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/17 13:04:23 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/17 17:12:34 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ t_list	*ft_pipex_lstnew(void *cont, int type)
 	return (test);
 }
 
-int	ft_cmd_first(t_pipex *pipex, int argc_l)
+void	ft_cmd_first(t_pipex *pipex, int argc_l)
 {
 	int		i;
 	char	*ppath;
@@ -33,32 +33,34 @@ int	ft_cmd_first(t_pipex *pipex, int argc_l)
 	int		infile;
 
 	i = 0;
-	cmd = ft_split(pipex->argv[*pipex->argc], ' ');
-	ft_lstadd_back(pipex->free, ft_pipex_lstnew(cmd, 2));
+	cmd = ft_split(pipex->argv[argc_l - 1], ' ');
+	ft_lstadd_back(&pipex->free, ft_pipex_lstnew(cmd, 2));
 	while (pipex->path[i])
 	{
 		ppath = ft_strjoin(pipex->path[i], cmd[0]);
 		if (access(ppath, X_OK) == 0)
 			break ;
 		free(ppath);
+		ppath = NULL;
 		i++;
 	}
-	ft_lstadd_back(pipex->free, ft_pipex_lstnew(ppath, 1));
-	if (ft_strncmp(pipex->argv[1], "here_doc", 8 == 0))
-		ft_here_doc();
-	else
-	{
-		infile = open(pipex->argv[1], O_RDONLY);
-		dup2(infile, STDIN_FILENO);
-		dup2(pipex->pipe1[1], STDOUT_FILENO);
-		close(infile);
-		close(pipex->pipe1[0]);
-		close(pipex->pipe1[1]);
-		execve(ppath, &cmd[1], pipex->envp);
-	}
+	if (ppath == NULL)
+		ft_lstadd_back(&pipex->free, ft_pipex_lstnew(ppath, 1));
+	// if (ft_strncmp(pipex->argv[1], "here_doc", 8 == 0))
+	// 	ft_here_doc();
+	// else
+	// {
+	infile = open(pipex->argv[1], O_RDONLY);
+	dup2(infile, STDIN_FILENO);
+	dup2(pipex->pipe1[1], STDOUT_FILENO);
+	close(infile);
+	close(pipex->pipe1[0]);
+	close(pipex->pipe1[1]);
+	execve(ppath, &cmd[1], pipex->envp);
+	// }
 }
 
-int	ft_child(t_pipex *pipex)
+void	ft_child(t_pipex *pipex)
 {
 	int	pid_n;
 	int	argc_l;
@@ -87,7 +89,7 @@ int	ft_child(t_pipex *pipex)
 	}
 }
 
-int	ft_cmd_n(t_pipex *pipex, int argc_l)
+void	ft_cmd_n(t_pipex *pipex, int argc_l)
 {
 	int		i;
 	char	*ppath;
@@ -95,24 +97,27 @@ int	ft_cmd_n(t_pipex *pipex, int argc_l)
 
 	i = 0;
 	cmd = ft_split(pipex->argv[argc_l - 3], ' ');
-	ft_lstadd_back(pipex->free, ft_pipex_lstnew(cmd, 2));
+	ft_lstadd_back(&pipex->free, ft_pipex_lstnew(cmd, 2));
 	while (pipex->path[i])
 	{
 		ppath = ft_strjoin(pipex->path[i], cmd[0]);
 		if (access(ppath, X_OK) == 0)
 			break ;
 		free(ppath);
+		ppath = NULL;
 		i++;
 	}
-	ft_lstadd_back(pipex->free, ft_pipex_lstnew(ppath, 1));
 	dup2(pipex->pipe1[1], STDOUT_FILENO);
 	dup2(pipex->pipe1[0], STDIN_FILENO);
 	close(pipex->pipe1[0]);
 	close(pipex->pipe1[1]);
+	if (ppath == NULL)
+		ft_lstadd_back(&pipex->free, ft_pipex_lstnew(ppath, 1));
 	execve(ppath, &cmd[1], pipex->envp);
+	strerror(2);
 }
 
-int	ft_parent_process(t_pipex *pipex)
+void	ft_parent_process(t_pipex *pipex)
 {
 	int	pid_f;
 	int	argc_l;
@@ -136,7 +141,7 @@ int	ft_parent_process(t_pipex *pipex)
 	}
 }
 
-int	ft_cmd_last(t_pipex *pipex, int argc_l)
+void	ft_cmd_last(t_pipex *pipex, int argc_l)
 {
 	int		i;
 	char	*ppath;
@@ -145,16 +150,17 @@ int	ft_cmd_last(t_pipex *pipex, int argc_l)
 
 	i = 0;
 	cmd = ft_split(pipex->argv[argc_l - 2], ' ');
-	ft_lstadd_back(pipex->free, ft_pipex_lstnew(cmd, 2));
+	ft_lstadd_back(&pipex->free, ft_pipex_lstnew(cmd, 2));
 	while (pipex->path[i])
 	{
 		ppath = ft_strjoin(pipex->path[i], cmd[0]);
 		if (access(ppath, X_OK) == 0)
 			break ;
 		free(ppath);
+		ppath = NULL;
 		i++;
 	}
-	ft_lstadd_back(pipex->free, ft_pipex_lstnew(ppath, 1));
+	ft_lstadd_back(&pipex->free, ft_pipex_lstnew(ppath, 1));
 	if (pipex->here_doc == 1)
 		outfile = open(pipex->argv[argc_l - 1], O_APPEND | O_CREAT, 0777);
 	else
@@ -163,12 +169,15 @@ int	ft_cmd_last(t_pipex *pipex, int argc_l)
 	dup2(pipex->pipe1[0], STDIN_FILENO);
 	close(outfile);
 	close(pipex->pipe1[0]);
+	close(pipex->pipe1[1]);
 	execve(ppath, &cmd[1], pipex->envp);
 }
 
 char	**ft_grab_envp(char **envp)
 {
-	int	i;
+	int		i;
+	char	**paths;
+	char	*tmp;
 
 	i = 0;
 	while (envp && envp[i])
@@ -177,16 +186,32 @@ char	**ft_grab_envp(char **envp)
 			break ;
 		i++;
 	}
-	return (ft_split(envp[i], ':'));
+	paths = ft_split(&envp[i][5], ':');
+	if (paths == NULL)
+		return (NULL);
+	i = 0;
+	while (paths[i])
+	{
+
+		if (paths[i][ft_strlen(paths[i]) - 1] != '/')
+		{
+			tmp = paths[i];
+			paths[i] = ft_strjoin(paths[i], "/\0");
+			free(tmp);
+		}
+		i++;
+	}
+	return (paths);
 }
 
-void	ft_init_env(t_pipex pipex, int *argc, char **argv, char **envp)
+void	ft_init_env(t_pipex *pipex, int *argc, char **argv, char **envp)
 {
-	pipex.envp = envp;
-	pipex.argv = argv;
-	pipex.argc = argc;
-	pipex.path = ft_grab_envp(envp);
-	pipex.free = ft_pipex_lstnew(NULL, 0);
+	pipex->envp = envp;
+	pipex->argv = argv;
+	pipex->argc = *argc;
+	pipex->path = ft_grab_envp(envp);
+	pipex->free = ft_pipex_lstnew(NULL, 0);
+	pipex->here_doc = 0;
 }
 
 int	main(int argc, char **argv, char **envp)
@@ -200,14 +225,9 @@ int	main(int argc, char **argv, char **envp)
 		ft_printf_err("Error: Wrong number of arguments");
 	else
 	{
+		ft_init_env(&pipex, &argc, argv, envp);
 		if (ft_strncmp(argv[1], "here_doc", 8) == 0)
 			pipex.here_doc = 1;
-		ft_init_env(pipex, &argc, argv, envp);
-		if (pipe(pipex.pipe0) == -1)
-		{
-			strerror(32);
-			return (32);
-		}
 		if (pipe(pipex.pipe1) == -1)
 		{
 			strerror(32);
