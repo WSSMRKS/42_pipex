@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 09:54:20 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/17 20:37:27 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/22 15:27:13 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ void	ft_cmd_first(t_pipex *pipex, int argc_l)
 	int		infile;
 	int		sux;
 
+	printf("trying to execute cmd 1\n");
 	i = 0;
 	sux = -1;
 	cmd = ft_split(pipex->argv[argc_l - 1], ' ');
@@ -42,10 +43,19 @@ void	ft_cmd_first(t_pipex *pipex, int argc_l)
 		ppath = ft_strjoin(pipex->path[i], cmd[0]);
 		sux = access(ppath, X_OK);
 		if (sux == 0)
+		{
+			printf("Path to cmd 1 found.\nPath is:\n");
+			printf("%s", ppath);
+			ft_printf("%s", ppath);
 			break ;
-		free(ppath);
-		ppath = NULL;
-		i++;
+		}
+		else
+		{
+			printf("{%s}\n", ppath);
+			// free(ppath);
+			// ppath = NULL;
+			i++;
+		}
 	}
 	// if (ft_strncmp(pipex->argv[1], "here_doc", 8 == 0))
 	// 	ft_here_doc();
@@ -58,7 +68,7 @@ void	ft_cmd_first(t_pipex *pipex, int argc_l)
 	close(pipex->pipe1[0]);
 	close(pipex->pipe1[1]);
 	if (infile > 0)
-		execve(ppath, &pipex->argv[1], pipex->envp);
+		execve(ppath, pipex->argv, pipex->envp);
 }
 
 void	ft_child(t_pipex *pipex)
