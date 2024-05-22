@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 09:54:20 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/22 15:27:13 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/22 16:13:22 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,6 +257,10 @@ int	main(int argc, char **argv, char **envp)
 		else if (pid_m == 0)
 			ft_parent_process(&pipex);
 		else
+		{
 			waitpid(pid_m, NULL, 0);
+			close(pipex.pipe1[0]);
+			close(pipex.pipe1[1]);
+		}
 	}
 }
