@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/27 10:21:31 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/27 10:57:46 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/27 11:27:46 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/wait.h>
-#include <../libft/libft.h>
+#include "../libft/libft.h"
 
 int	main(int argc, char **argv, char **envp)
 {
@@ -37,14 +37,17 @@ int	main(int argc, char **argv, char **envp)
 		printf("we are in the first child process with id: %d\n", id1);
 		close(fds[0]);
 		printf("Input a string to pass to the parent: ");
-		scanf("%s", string1);
+		string1 = ft_get_next_line(STDIN_FILENO);
+		printf("This is the String i read: %s\n", string1);
+		fflush(stdout);
 		size1 = ft_strlen(string1);
-		write(fds[1], &size, sizeof(int));
-		write(fds[1], &string1, sizeof(string1));
+		write(fds[1], &size1, sizeof(int));
+		write(fds[1], &string1, size1 + 1);
 		close(fds[1]);
 	}
 	else
 	{
+		wait(NULL);
 		id2 = fork();
 		if (id2 == 0)
 		{
@@ -54,14 +57,17 @@ int	main(int argc, char **argv, char **envp)
 			printf("we are in the second child process with id: %d\n", id2);
 			close(fds[0]);
 			printf("Input a string to pass to the parent: ");
-			scanf("%s", string2);
+			string2 = ft_get_next_line(STDIN_FILENO);
+			printf("This is the String i read: %s\n", string2);
+			fflush(stdout);
 			size2 = ft_strlen(string2);
 			write(fds[1], &size2, sizeof(int));
-			write(fds[1], &string2, sizeof(string2));
+			write(fds[1], &string2, size2 + 1);
 			close(fds[1]);
 		}
 		else
 		{
+			wait(NULL);
 			char	*res1;
 			int		res1_s;
 			char	*res2;
@@ -71,10 +77,12 @@ int	main(int argc, char **argv, char **envp)
 			close(fds[1]);
 			printf("we are in the parent process with id1: %d and id2: %d\n", id1, id2);
 			read(fds[0], &res1_s, sizeof(int));
+			printf("I received the following value as the length of string1: %d\n", res1_s);
 			res1 = ft_calloc(sizeof(char), res1_s + 1);
 			read(fds[0], &res1, (res1_s + 1));
 			printf("I received the following string from child1: {%s}\n", res1);
-			read(fds[0], res2_s, sizeof(int));
+			fflush(stdout);
+			read(fds[0], &res2_s, sizeof(int));
 			res2 = ft_calloc(sizeof(char), res2_s + 1);
 			read(fds[0], &res1, (res2_s + 1));
 			printf("I received the following string from child2: {%s}\n", res1);
