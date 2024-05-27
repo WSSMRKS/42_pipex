@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 09:54:20 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/22 16:13:22 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/22 19:33:04 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,8 @@ void	ft_cmd_first(t_pipex *pipex, int argc_l)
 		if (sux == 0)
 		{
 			printf("Path to cmd 1 found.\nPath is:\n");
-			printf("%s", ppath);
-			ft_printf("%s", ppath);
+			printf("printf %s\n", ppath);
+			ft_printf("ft_printf %s\n", ppath);
 			break ;
 		}
 		else

@@ -18,7 +18,7 @@ COPTIONS = -D Z_SCALE=1 -g -Werror -Wall -Wextra -O0 -c
 # ADD SEARCHFLAGS FOR LIBFT ,...
 CC = cc
 # Source Files #
-SRC = src/pipex_new_approach.c
+SRC = src/pipex.c
 HEADERS = pipex.h
 LIBFT_SRC = libft/libft.a
 # Object Files
