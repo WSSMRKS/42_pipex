@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/28 15:28:14 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/28 16:09:54 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,10 @@ typedef struct s_pipex {
 	char	**cmds;
 	char	***cmd_args;
 	int		pipe1[2];
-	int		here_doc;
+	int		mode;
 	char	*delimiter;
+	char	*infile;
+	char	*outfile;
 	t_list	*free;
 }				t_pipex;
 
