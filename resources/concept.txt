@@ -116,7 +116,7 @@ read from here_doc with delimiter.
 	adjust gnl to close and free after delimiter is found
 	append to file (open file with Append flag.)
 
-
+append output to file. (different open syntax)
 
 
 

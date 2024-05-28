@@ -1,0 +1,4 @@
+man 2 wait: input values of wait to wait for all child processes
+
+https://reactive.so/post/42-a-comprehensive-guide-to-pipex
+Function hirarchy

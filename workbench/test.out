@@ -1,0 +1,4 @@
+/*Split program into two processes resulting in two hello world statemenets.*/
+int main(int argc, char **argv)
+	int id = fork();
+	printf("Hello world from id: %d\n", id);
