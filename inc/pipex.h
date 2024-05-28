@@ -6,34 +6,50 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/17 16:55:57 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/28 15:28:14 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PIPEX_H
 # define PIPEX_H
 
-# include <stdio.h>
-# include <unistd.h>
-# include <sys/wait.h>
+//libft
 # include <stddef.h>
 # include <stdlib.h>
 # include <stdarg.h>
+# include <unistd.h>
 # include <limits.h>
 # include <ctype.h>
+//current project
+# include <stdio.h>
+# include <sys/wait.h>
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <fcntl.h>
 # include <string.h>
 
+//libft
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 100
-
 # endif
 # ifndef MAX_FD
 #  define MAX_FD 1048
-
 # endif
+//current project
+
+typedef enum e_case
+{
+	error_case,
+	base_case,
+	bonus_case,
+	here_doc
+} t_case;
+
+typedef enum e_bool
+{
+	false,
+	true
+} t_bool;
 
 typedef struct s_list
 {
@@ -43,13 +59,16 @@ typedef struct s_list
 }					t_list;
 
 typedef struct s_pipex {
-	char	**path;
-	char	**envp;
-	char	**argv;
 	int		argc;
+	char	**argv;
+	char	**envp;
+	char	**path;
+	char	**cmds;
+	char	***cmd_args;
 	int		pipe1[2];
-	t_list	*free;
 	int		here_doc;
+	char	*delimiter;
+	t_list	*free;
 }				t_pipex;
 
 // libft

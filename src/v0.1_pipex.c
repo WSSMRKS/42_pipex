@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
+/*   v0.1_pipex.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/28 15:17:32 by maweiss          ###   ########.fr       */
+/*   Created: 2024/05/16 09:54:20 by maweiss           #+#    #+#             */
+/*   Updated: 2024/05/28 14:09:54 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,35 @@ void	ft_cmd_first(t_pipex *pipex, int argc_l)
 		execve(ppath, pipex->argv, pipex->envp);
 }
 
+void	ft_child(t_pipex *pipex)
+{
+	int	pid_n;
+	int	argc_l;
+
+	argc_l = pipex->argc;
+	if (argc_l <= 3)
+		ft_cmd_first(pipex, argc_l);
+	else
+	{
+		pid_n = fork();
+		if (pid_n < 0)
+		{
+			strerror(10);
+			exit(10);
+		}
+		else if (pid_n == 0)
+		{
+			pipex->argc = pipex->argc - 1;
+			ft_child(pipex);
+		}
+		else
+		{
+			waitpid(pid_n, NULL, 0);
+			ft_cmd_n(pipex, argc_l);
+		}
+	}
+}
+
 void	ft_cmd_n(t_pipex *pipex, int argc_l)
 {
 	int		i;
@@ -97,6 +126,30 @@ void	ft_cmd_n(t_pipex *pipex, int argc_l)
 		ft_lstadd_back(&pipex->free, ft_pipex_lstnew(ppath, 1));
 	execve(ppath, &pipex->argv[argc_l - 3], pipex->envp);
 	strerror(2);
+}
+
+void	ft_parent_process(t_pipex *pipex)
+{
+	int	pid_f;
+	int	argc_l;
+
+	argc_l = pipex->argc;
+	pid_f = fork();
+	if (pid_f < 0)
+	{
+		strerror(10);
+		exit(10);
+	}
+	else if (pid_f == 0)
+	{
+		pipex->argc = pipex->argc - 2;
+		ft_child(pipex);
+	}
+	else
+	{
+		waitpid(pid_f, NULL, 0);
+		ft_cmd_last(pipex, argc_l);
+	}
 }
 
 void	ft_cmd_last(t_pipex *pipex, int argc_l)
@@ -168,127 +221,33 @@ char	**ft_grab_envp(char **envp)
 
 void	ft_init_env(t_pipex *pipex, int *argc, char **argv, char **envp)
 {
-	pipex->argc = *argc;
-	pipex->argv = argv;
 	pipex->envp = envp;
-	pipex->path = NULL;
-	pipex->cmds = NULL;
-	pipex->cmd_args = NULL;
-	pipex->pipe1[0] = 0;
-	pipex->pipe1[1] = 0;
+	pipex->argv = argv;
+	pipex->argc = *argc;
+	pipex->path = ft_grab_envp(envp);
+	pipex->free = ft_pipex_lstnew(NULL, 0);
 	pipex->here_doc = 0;
-	pipex->free = NULL;
-	
 }
 
-void	ft_child(t_pipex *pipex)
-{
-	int	pid_n;
-	int	argc_l;
-
-	argc_l = pipex->argc;
-	if (argc_l == 5)
-		ft_cmd_first(pipex, argc_l);
-	else
-	{
-		while(pid_n != 0)
-			pid_n = fork();
-		if (pid_n < 0)
-		{
-			strerror(10);
-			exit(10);
-		}
-		else if (pid_n == 0)
-		{
-			pipex->argc = pipex->argc - 1;
-			ft_child(pipex);
-		}
-		else
-		{
-			waitpid(pid_n, NULL, 0);
-			ft_cmd_n(pipex, argc_l);
-		}
-	}
-}
-
-void	ft_parent_process(t_pipex *pipex)
-{
-	ft_cmd_last(pipex);
-}
-
-void	ft_validate_args(t_pipex *pipex)
-{
-	if (pipex->argc < 5)
-	{
-		ft_printf_err("Error: Wrong number of arguments\n");
-		exit(1);
-	}
-	else if (ft_strncmp(pipex->argv[1], "here_doc", 8) == 0 && pipex->argc == 6)
-	{
-		pipex->here_doc = 1;
-		pipex->delimiter = ft_strdup(pipex->argv[2]); //[ ] free;
-	}
-}
-
-/*
-		basecase:
-			argv[1] == infile;
-			argv[2] == cmd1;
-			argv[3] == cmd2;
-			argv[4] == outfile;
-		bonus:
-			argv[1] == infile;
-			argv[2] == cmd1;
-			argv[3] == cmd2
-			...
-			argv[n-1] == cmdn;
-			argv[n+1] == outfile;
-		here_doc:
-			argv[1] == here_doc;
-			argv[2] == delimiter;
-			argv[3] == cmd1
-			argv[4] == cmd2
-			argv[5] == outfile (in append mode);
-*/
-void	ft_parse_cmds(t_pipex *pipex)
-{
-	if (pipex->here_doc == 1)
-		pipex->here_doc = 1; // [ ] handle heredoc
-	else
-	{
-		
-	}
-}
-
-/*
-main()
-{
-	ft_init_pipex()
-	ft_check_args()
-	ft_parse_cmds()
-	ft_parse_args()
-	while (cmds)
-		ft_exec()
-	ft_cleanup()
-}
-*/
 int	main(int argc, char **argv, char **envp)
 {
+	// int		i;
 	int		pid_m;
-	int		pid_n;
 	t_pipex	pipex;
 
-	ft_init_env(&pipex, &argc, argv, envp);
-	ft_validate_args(&pipex);
-	ft_parse_cmds(&pipex);
-	ft_parse_cmd_args(&pipex);
-	if (pipe(pipex.pipe1) == -1)
+	// i = 0;
+	if (argc < 5)
+		ft_printf_err("Error: Wrong number of arguments\n");
+	else
+	{
+		ft_init_env(&pipex, &argc, argv, envp);
+		if (ft_strncmp(argv[1], "here_doc", 8) == 0)
+			pipex.here_doc = 1;
+		if (pipe(pipex.pipe1) == -1)
 		{
 			strerror(32);
 			return (32);
 		}
-		while (argc > 5)
-		
 		pid_m = fork();
 		if (pid_m < 0)
 		{
@@ -296,23 +255,12 @@ int	main(int argc, char **argv, char **envp)
 			return (10);
 		}
 		else if (pid_m == 0)
-			ft_first_child(&pipex);
+			ft_parent_process(&pipex);
 		else
 		{
-			// while (argc > 5)
-			// {
-			// 	pid_n = fork();
-			// 	if (pid_n == 0)
-			// 		ft_child(&pipex) //execute command 2, 3, n;			
-			// }
-			if (pid_n != 0)
-				ft_parent_process(&pipex);
-			// close(pipex.pipe1[1]);
-			// waitpid(-1, NULL, 0);
-			// // open file
-			// // dup 2 stdout to outfile
-			// // execve command last
-			// close(pipex.pipe1[0]);
+			waitpid(-1, NULL, 0);
+			close(pipex.pipe1[0]);
+			close(pipex.pipe1[1]);
 		}
 	}
 }
