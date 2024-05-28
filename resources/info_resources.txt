@@ -2,3 +2,27 @@ man 2 wait: input values of wait to wait for all child processes
 
 https://reactive.so/post/42-a-comprehensive-guide-to-pipex
 Function hirarchy
+
+pipex of aschenk:
+https://git.histb.com/alx-sch/42_pipex
+
+Online resource with function hirarchy and pipe visualized
+https://csnotes.medium.com/pipex-tutorial-42-project-4469f5dd5901
+
+pipex readme of jdecorte-be
+https://github.com/jdecorte-be/42-Pipex
+
+tutorial on pipex and minitalk.
+https://medium.com/@lannur-s
+
+pipex repo 125%:
+https://github.com/tolmvad/pipex
+
+gitbook on pipex:
+https://42-cursus.gitbook.io/guide/rank-02/pipex/building-the-thing
+
+github nicely explained pipex:
+https://github.com/shinckel/pipex/tree/main
+
+online resource on enum:
+https://www.w3schools.com/c/c_enums.php
