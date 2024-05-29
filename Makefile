@@ -14,7 +14,7 @@ BONUS_NAME = pipex_bonus
 # Compiler & COptions & CFlags #
 CFLAGS =  -g -Werror -Wall -Wextra
 TESTFLAGS = -g3
-COPTIONS = -g -Werror -Wall -Wextra -O0 -c
+COPTIONS = -g3 -Werror -Wall -Wextra -O0 -c
 # ADD SEARCHFLAGS FOR LIBFT ,...
 CC = cc
 # Source Files #

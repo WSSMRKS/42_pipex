@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/29 09:05:17 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/29 11:03:29 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ typedef enum e_bool
 typedef struct s_list
 {
 	void			*cont;
-	int				type; // 1 = string, 2 = 2d-array, 0 = empty
+	int				type; // 1 = string, 2 = 2d-array, 3 = 3d-array, 0 = empty
 	struct s_list	*next;
 }					t_list;
 
@@ -70,7 +70,6 @@ typedef struct s_pipex {
 	char	*delimiter;
 	char	*infile;
 	char	*outfile;
-	t_list	*free;
 	int		nb_cmds;
 }				t_pipex;
 
@@ -129,6 +128,8 @@ int		ft_putchar_fd_ret(char c, int fd);
 char	*ft_get_next_line(int fd);
 void	ft_putstr_non_printable(char *str, size_t n);
 int		ft_abs(int a);
+int		ft_free_2d(char **tofree);
+int		ft_free_3d(char ***tofree);
 
 // pipex
 void	ft_init_env(t_pipex *pipex, int *argc, char **argv, char **envp);

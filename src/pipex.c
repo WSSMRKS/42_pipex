@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/29 09:06:02 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/29 11:07:25 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,12 @@ void	ft_init_env(t_pipex *pipex, int *argc, char **argv, char **envp)
 	pipex->cmd_args = NULL;
 	pipex->pipe1[0] = 0;
 	pipex->pipe1[1] = 0;
-	pipex->free = NULL;
+	pipex->mode = 0;
+	pipex->delimiter = NULL;
+	pipex->infile = NULL;
+	pipex->outfile = NULL;
 	pipex->nb_cmds = 0;
+	
 	
 }
 
@@ -72,11 +76,15 @@ void	ft_parse_cmds(t_pipex *pipex)
 	i = -1;
 	pipex->outfile = ft_strdup(pipex->argv[pipex->argc - 1]); // [ ] free
 	pipex->cmd_args = ft_calloc(sizeof(char **), nb_cmds + 1); // [ ] free
-	pipex->cmds = ft_calloc(sizeof(char *), nb_cmds + 1);
+	pipex->cmds = ft_calloc(sizeof(char *), nb_cmds + 1); // [ ] free
 	while (++i < nb_cmds)
 	{
 		pipex->cmd_args[i] = ft_split(pipex->argv[i + offset], ' ');
 		pipex->cmds[i] = ft_strdup(pipex->cmd_args[i][0]); // [ ] free
+    	printf("Command %d: %s\n", i, pipex->cmds[i]); // Debug print
+   		for (int j = 0; pipex->cmd_args[i][j]; j++) {
+        printf("Arg %d: %s\n", j, pipex->cmd_args[i][j]); // Debug print
+		}
 	}
 	pipex->nb_cmds = nb_cmds;
 	pipex->cmd_args[i] = NULL;
@@ -144,6 +152,7 @@ char *ft_search_cmd(t_pipex *pipex, int nbcmd)
 		if (access(path, X_OK) == 0)
 			break ;
 		free(path);
+		i++;
 	}
 	return (path);
 }
@@ -154,7 +163,7 @@ int	ft_first_child(t_pipex *pipex)
 	char	*cmdpath;
 	
 	close(pipex->pipe1[0]);
-	fdin = open(pipex->infile, O_WRONLY);
+	fdin = open(pipex->infile, O_RDONLY);
 	if (fdin < 0)
 	{
 		perror("infile");
@@ -171,7 +180,8 @@ int	ft_first_child(t_pipex *pipex)
 		perror("command not found");
 	else
 	{
-		if (execve(cmdpath, pipex->cmd_args[0], NULL) == -1)
+		ft_printf_err("cmdpath child: {%s}\n", cmdpath);
+		if (execve(cmdpath, pipex->cmd_args[0], pipex->envp) == -1)
 		{
 			free(cmdpath);
 			perror("Execve failed!\n");
@@ -210,10 +220,29 @@ int	ft_first_child(t_pipex *pipex)
 // 	}
 // }
 
+void	ft_cleanup(t_pipex *pipex)
+{
+	if (pipex->delimiter)
+		free(pipex->delimiter);
+	if (pipex->infile)
+		free(pipex->infile);
+	if (pipex->outfile)
+		free(pipex->outfile);
+	if (pipex->cmds)
+		ft_free_2d(pipex->cmds);
+	if (pipex->path)
+		ft_free_2d(pipex->path);
+	if (pipex->cmd_args)
+		ft_free_3d(pipex->cmd_args);
+}
+
+
 int	ft_parent_process(t_pipex *pipex)
 {
 	char	*cmdpath;
 	int		fdout;
+	char	**cmd_args;
+	char	**envp;
 
 	close(pipex->pipe1[1]);
 	fdout = open(pipex->outfile, O_CREAT | O_RDWR | O_TRUNC, 0644);
@@ -228,12 +257,17 @@ int	ft_parent_process(t_pipex *pipex)
 		close(fdout);
 	}
 	dup2(pipex->pipe1[0], STDIN_FILENO);
-	cmdpath = ft_search_cmd(pipex, 1);
+	cmdpath = ft_search_cmd(pipex, 2);
 	if (cmdpath == NULL)
 		perror("command not found");
 	else
 	{
-		if (execve(cmdpath, pipex->cmd_args[pipex->nb_cmds - 1], NULL) == -1)
+		ft_printf_err("cmdpath parent: {%s}\n", cmdpath);
+		cmd_args = pipex->cmd_args[pipex->nb_cmds - 1];
+		pipex->cmd_args[pipex->nb_cmds - 1] = NULL;
+		envp = pipex->envp;
+		ft_cleanup(pipex);
+		if (execve(cmdpath, cmd_args, envp) == -1)
 		{
 			free(cmdpath);
 			perror("execve failed!\n");
