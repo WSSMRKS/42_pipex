@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/28 16:09:54 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/29 09:05:17 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ typedef struct s_pipex {
 	char	*infile;
 	char	*outfile;
 	t_list	*free;
+	int		nb_cmds;
 }				t_pipex;
 
 // libft
@@ -130,13 +131,13 @@ void	ft_putstr_non_printable(char *str, size_t n);
 int		ft_abs(int a);
 
 // pipex
-t_list	*ft_pipex_lstnew(void *cont, int type);
-void	ft_cmd_first(t_pipex *pipex, int argc_l);
-void	ft_child(t_pipex *pipex);
-void	ft_cmd_n(t_pipex *pipex, int argc_l);
-void	ft_parent_process(t_pipex *pipex);
-void	ft_cmd_last(t_pipex *pipex, int argc_l);
+void	ft_init_env(t_pipex *pipex, int *argc, char **argv, char **envp);
+void	ft_validate_args(t_pipex *pipex);
+void	ft_parse_cmds(t_pipex *pipex);
 char	**ft_grab_envp(char **envp);
-void	ft_init_env(t_pipex *ipex, int *argc, char **argv, char **envp);
+t_list	*ft_pipex_lstnew(void *cont, int type);
+char	*ft_search_cmd(t_pipex *pipex, int nbcmd);
+int		ft_first_child(t_pipex *pipex);
+int		ft_parent_process(t_pipex *pipex);
 
 #endif
