@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/29 11:07:25 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/30 18:04:52 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,6 +175,7 @@ int	ft_first_child(t_pipex *pipex)
 		close(fdin);
 	}
 	dup2(pipex->pipe1[1], STDOUT_FILENO);
+	close(pipex->pipe1[1]);
 	cmdpath = ft_search_cmd(pipex, 1);
 	if (cmdpath == NULL)
 		perror("command not found");
@@ -190,35 +191,28 @@ int	ft_first_child(t_pipex *pipex)
 	return (1);
 }
 
-// void	ft_child(t_pipex *pipex)
-// {
-// 	int	pid_n;
-// 	int	argc_l;
+int	ft_child(t_pipex *pipex, int nb_cmd)
+{
+	char	*cmdpath;
 
-// 	argc_l = pipex->argc;
-// 	if (argc_l == 5)
-// 		ft_cmd_first(pipex, argc_l);
-// 	else
-// 	{
-// 		while(pid_n != 0)
-// 			pid_n = fork();
-// 		if (pid_n < 0)
-// 		{
-// 			strerror(10);
-// 			exit(10);
-// 		}
-// 		else if (pid_n == 0)
-// 		{
-// 			pipex->argc = pipex->argc - 1;
-// 			ft_child(pipex);
-// 		}
-// 		else
-// 		{
-// 			waitpid(pid_n, NULL, 0);
-// 			ft_cmd_n(pipex, argc_l);
-// 		}
-// 	}
-// }
+	dup2(pipex->pipe1[0], STDIN_FILENO);
+	dup2(stdout, STDOUT_FILENO);
+	close(pipex->pipe1[0]);
+	close(pipex->pipe1[1]);
+	cmdpath = ft_search_cmd(pipex, nb_cmd);
+	if (cmdpath == NULL)
+		perror("command not found");
+	else
+	{
+		ft_printf_err("cmdpath child: {%s}\n", cmdpath);
+		if (execve(cmdpath, pipex->cmd_args[nb_cmd - 1], pipex->envp) == -1)
+		{
+			free(cmdpath);
+			perror("Execve failed!\n");
+		}
+	}
+	return (1);
+}
 
 void	ft_cleanup(t_pipex *pipex)
 {
@@ -257,6 +251,7 @@ int	ft_parent_process(t_pipex *pipex)
 		close(fdout);
 	}
 	dup2(pipex->pipe1[0], STDIN_FILENO);
+	close(pipex->pipe1[0]);
 	cmdpath = ft_search_cmd(pipex, 2);
 	if (cmdpath == NULL)
 		perror("command not found");
@@ -282,10 +277,11 @@ int	ft_parent_process(t_pipex *pipex)
 int	main(int argc, char **argv, char **envp)
 {
 	int		pid_m;
-	// int		pid_n;
+	int		pid_n;
 	t_pipex	pipex;
-	// int		i;
+	int		i;
 
+	pid_n = -5;
 	ft_init_env(&pipex, &argc, argv, envp);
 	ft_validate_args(&pipex);
 	ft_parse_cmds(&pipex);
@@ -308,17 +304,18 @@ int	main(int argc, char **argv, char **envp)
 			ft_first_child(&pipex);
 	else
 	{
-		// i = 2;
-		// while (i < pipex.nb_cmds)
-		// {
-		// 	pid_n = fork();
-		// 	if (pid_n == 0)
-		// 		ft_child(&pipex); //execute command 2, 3, n;			
-		// }
-		close(pipex.pipe1[1]);
-		// if (pid_n != 0)
+		i = 2;
+		while (pid_n != 0 && i < pipex.nb_cmds)
+		{
+			pid_n = fork();
+			if (pid_n == 0)
+				ft_child(&pipex, i); //execute command 2, 3, n;
+			i++;
+		}
+		if (pid_n != 0)
+		{
+			waitpid(-1, NULL, 0);
 			ft_parent_process(&pipex);
-		waitpid(-1, NULL, 0);
-		close(pipex.pipe1[0]);
+		}
 	}
 }
