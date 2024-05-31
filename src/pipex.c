@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/31 17:06:55 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/31 17:19:21 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,12 +164,9 @@ int	ft_first_child(t_pipex *pipex)
 		perror("infile");
 		return (2);
 	}
-	else
-	{
-		dup2(fdin, STDIN_FILENO);
-		close(fdin);
-	}
+	dup2(fdin, STDIN_FILENO);
 	dup2(pipex->pipe[1][1], STDOUT_FILENO);
+	close(fdin);
 	close(pipex->pipe[1][1]);
 	close(pipex->pipe[0][0]);
 	close(pipex->pipe[0][1]);
