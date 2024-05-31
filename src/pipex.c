@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/30 18:04:52 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/05/31 16:59:11 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,11 @@ void	ft_init_env(t_pipex *pipex, int *argc, char **argv, char **envp)
 	pipex->path = NULL;
 	pipex->cmds = NULL;
 	pipex->cmd_args = NULL;
-	pipex->pipe1[0] = 0;
-	pipex->pipe1[1] = 0;
 	pipex->mode = 0;
 	pipex->delimiter = NULL;
 	pipex->infile = NULL;
 	pipex->outfile = NULL;
 	pipex->nb_cmds = 0;
-	
-	
 }
 
 void	ft_validate_args(t_pipex *pipex)
@@ -64,7 +60,7 @@ void	ft_parse_cmds(t_pipex *pipex)
 
 	offset = 2;
 	nb_cmds = pipex->argc - 3;
-	
+
 	if (pipex->mode == here_doc)
 	{
 		offset++;
@@ -139,7 +135,7 @@ char *ft_search_cmd(t_pipex *pipex, int nbcmd)
 {
 	int		i;
 	char	*path;
-	
+
 	i = 0;
 	while(pipex->path[i])
 	{
@@ -161,8 +157,7 @@ int	ft_first_child(t_pipex *pipex)
 {
 	int		fdin;
 	char	*cmdpath;
-	
-	close(pipex->pipe1[0]);
+
 	fdin = open(pipex->infile, O_RDONLY);
 	if (fdin < 0)
 	{
@@ -174,8 +169,11 @@ int	ft_first_child(t_pipex *pipex)
 		dup2(fdin, STDIN_FILENO);
 		close(fdin);
 	}
-	dup2(pipex->pipe1[1], STDOUT_FILENO);
-	close(pipex->pipe1[1]);
+	dup2(pipex->pipe[1][1], STDOUT_FILENO);
+	close(pipex->pipe[1][1]);
+	close(pipex->pipe[0][0]);
+	close(pipex->pipe[0][1]);
+	close(pipex->pipe[1][0]);
 	cmdpath = ft_search_cmd(pipex, 1);
 	if (cmdpath == NULL)
 		perror("command not found");
@@ -195,10 +193,12 @@ int	ft_child(t_pipex *pipex, int nb_cmd)
 {
 	char	*cmdpath;
 
-	dup2(pipex->pipe1[0], STDIN_FILENO);
-	dup2(stdout, STDOUT_FILENO);
-	close(pipex->pipe1[0]);
-	close(pipex->pipe1[1]);
+	dup2(pipex->pipe[nb_cmd - 1 & 1][0], STDIN_FILENO);
+	dup2(pipex->pipe[nb_cmd & 1][1], STDOUT_FILENO);
+	close(pipex->pipe[0][0]);
+	close(pipex->pipe[0][1]);
+	close(pipex->pipe[1][0]);
+	close(pipex->pipe[1][1]);
 	cmdpath = ft_search_cmd(pipex, nb_cmd);
 	if (cmdpath == NULL)
 		perror("command not found");
@@ -238,7 +238,6 @@ int	ft_parent_process(t_pipex *pipex)
 	char	**cmd_args;
 	char	**envp;
 
-	close(pipex->pipe1[1]);
 	fdout = open(pipex->outfile, O_CREAT | O_RDWR | O_TRUNC, 0644);
 	if (fdout < 0)
 	{
@@ -250,9 +249,12 @@ int	ft_parent_process(t_pipex *pipex)
 		dup2(fdout, STDOUT_FILENO);
 		close(fdout);
 	}
-	dup2(pipex->pipe1[0], STDIN_FILENO);
-	close(pipex->pipe1[0]);
-	cmdpath = ft_search_cmd(pipex, 2);
+	dup2(pipex->pipe[pipex->nb_cmds -1 & 1][0], STDIN_FILENO);
+	close(pipex->pipe[0][0]);
+	close(pipex->pipe[0][1]);
+	close(pipex->pipe[1][0]);
+	close(pipex->pipe[1][1]);
+	cmdpath = ft_search_cmd(pipex, pipex->nb_cmds);
 	if (cmdpath == NULL)
 		perror("command not found");
 	else
@@ -271,7 +273,7 @@ int	ft_parent_process(t_pipex *pipex)
 	return (1);
 }
 
-/* 	main function of project pipex. Input syntax: ./pipex infile cmd1 ... cmdn outfile 
+/* 	main function of project pipex. Input syntax: ./pipex infile cmd1 ... cmdn outfile
 	alternative: ./pipex here_doc LIMITER cmd1 cmd2 outfile
 */
 int	main(int argc, char **argv, char **envp)
@@ -286,7 +288,7 @@ int	main(int argc, char **argv, char **envp)
 	ft_validate_args(&pipex);
 	ft_parse_cmds(&pipex);
 	pipex.path = ft_grab_envp(pipex.envp);
-	if (pipe(pipex.pipe1) == -1)
+	if (pipe(pipex.pipe[0]) == -1 || pipe(pipex.pipe[1]) == -1)
 	{
 		strerror(32);
 		return (32);
