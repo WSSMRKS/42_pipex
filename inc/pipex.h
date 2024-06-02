@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/31 14:25:37 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/02 18:07:16 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,5 +140,10 @@ t_list	*ft_pipex_lstnew(void *cont, int type);
 char	*ft_search_cmd(t_pipex *pipex, int nbcmd);
 int		ft_first_child(t_pipex *pipex);
 int		ft_parent_process(t_pipex *pipex);
+void	ft_cleanup(t_pipex *pipex);
+int		ft_child(t_pipex *pipex, int nb_cmd);
+
+
+
 
 #endif

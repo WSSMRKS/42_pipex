@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/05/31 17:19:21 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/02 18:35:16 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,10 +77,6 @@ void	ft_parse_cmds(t_pipex *pipex)
 	{
 		pipex->cmd_args[i] = ft_split(pipex->argv[i + offset], ' ');
 		pipex->cmds[i] = ft_strdup(pipex->cmd_args[i][0]); // [ ] free
-    	printf("Command %d: %s\n", i, pipex->cmds[i]); // Debug print
-   		for (int j = 0; pipex->cmd_args[i][j]; j++) {
-        printf("Arg %d: %s\n", j, pipex->cmd_args[i][j]); // Debug print
-		}
 	}
 	pipex->nb_cmds = nb_cmds;
 	pipex->cmd_args[i] = NULL;
@@ -135,7 +131,9 @@ char *ft_search_cmd(t_pipex *pipex, int nbcmd)
 {
 	int		i;
 	char	*path;
-
+	int		sux;
+	
+	sux = 1;
 	i = 0;
 	while(pipex->path[i])
 	{
@@ -145,12 +143,16 @@ char *ft_search_cmd(t_pipex *pipex, int nbcmd)
 			perror("malloc fail!\n");
 			exit(4);
 		}
-		if (access(path, X_OK) == 0)
+		sux = access(path, X_OK);
+		if (sux == 0)
 			break ;
 		free(path);
 		i++;
 	}
-	return (path);
+	if (sux == 0)
+		return (path);
+	else
+		return (NULL);
 }
 
 int	ft_first_child(t_pipex *pipex)
@@ -173,15 +175,14 @@ int	ft_first_child(t_pipex *pipex)
 	close(pipex->pipe[1][0]);
 	cmdpath = ft_search_cmd(pipex, 1);
 	if (cmdpath == NULL)
-		perror("command not found");
+	{
+		ft_printf_err("command not found");
+		free(cmdpath);
+	}
 	else
 	{
-		ft_printf_err("cmdpath child: {%s}\n", cmdpath);
 		if (execve(cmdpath, pipex->cmd_args[0], pipex->envp) == -1)
-		{
-			free(cmdpath);
 			perror("Execve failed!\n");
-		}
 	}
 	return (1);
 }
@@ -190,23 +191,22 @@ int	ft_child(t_pipex *pipex, int nb_cmd)
 {
 	char	*cmdpath;
 
-	dup2(pipex->pipe[nb_cmd - 1 & 1][0], STDIN_FILENO);
+	dup2(pipex->pipe[(nb_cmd - 1) & 1][0], STDIN_FILENO);
 	dup2(pipex->pipe[nb_cmd & 1][1], STDOUT_FILENO);
 	close(pipex->pipe[0][0]);
 	close(pipex->pipe[0][1]);
 	close(pipex->pipe[1][0]);
 	close(pipex->pipe[1][1]);
-	cmdpath = ft_search_cmd(pipex, nb_cmd);
+	cmdpath = ft_search_cmd(pipex, 1);
 	if (cmdpath == NULL)
-		perror("command not found");
+	{
+		ft_printf_err("command not found");
+		free(cmdpath);
+	}
 	else
 	{
-		ft_printf_err("cmdpath child: {%s}\n", cmdpath);
-		if (execve(cmdpath, pipex->cmd_args[nb_cmd - 1], pipex->envp) == -1)
-		{
-			free(cmdpath);
+		if (execve(cmdpath, pipex->cmd_args[0], pipex->envp) == -1)
 			perror("Execve failed!\n");
-		}
 	}
 	return (1);
 }
@@ -232,8 +232,6 @@ int	ft_parent_process(t_pipex *pipex)
 {
 	char	*cmdpath;
 	int		fdout;
-	char	**cmd_args;
-	char	**envp;
 
 	fdout = open(pipex->outfile, O_CREAT | O_RDWR | O_TRUNC, 0644);
 	if (fdout < 0)
@@ -246,26 +244,21 @@ int	ft_parent_process(t_pipex *pipex)
 		dup2(fdout, STDOUT_FILENO);
 		close(fdout);
 	}
-	dup2(pipex->pipe[pipex->nb_cmds -1 & 1][0], STDIN_FILENO);
+	dup2(pipex->pipe[(pipex->nb_cmds -1) & 1][0], STDIN_FILENO);
 	close(pipex->pipe[0][0]);
 	close(pipex->pipe[0][1]);
 	close(pipex->pipe[1][0]);
 	close(pipex->pipe[1][1]);
 	cmdpath = ft_search_cmd(pipex, pipex->nb_cmds);
 	if (cmdpath == NULL)
-		perror("command not found");
+	{
+		ft_printf_err("command not found");
+		free(cmdpath);
+	}
 	else
 	{
-		ft_printf_err("cmdpath parent: {%s}\n", cmdpath);
-		cmd_args = pipex->cmd_args[pipex->nb_cmds - 1];
-		pipex->cmd_args[pipex->nb_cmds - 1] = NULL;
-		envp = pipex->envp;
-		ft_cleanup(pipex);
-		if (execve(cmdpath, cmd_args, envp) == -1)
-		{
-			free(cmdpath);
+		if (execve(cmdpath, pipex->cmd_args[pipex->nb_cmds - 1], pipex->envp) == -1)
 			perror("execve failed!\n");
-		}
 	}
 	return (1);
 }
@@ -309,12 +302,21 @@ int	main(int argc, char **argv, char **envp)
 			pid_n = fork();
 			if (pid_n == 0)
 				ft_child(&pipex, i); //execute command 2, 3, n;
+			if (close(pipex.pipe[(i - 1) & 1][0]) || close(pipex.pipe[(i - 1) & 1][1]))
+				perror("error");
+			pipe(pipex.pipe[(i - 1) & 1]);
 			i++;
 		}
 		if (pid_n != 0)
 		{
-			waitpid(-1, NULL, 0);
-			ft_parent_process(&pipex);
+			pid_n = fork();
+			if (pid_n == 0)			
+				ft_parent_process(&pipex);
+			else
+			{
+				waitpid(-1, NULL, 0);
+				ft_cleanup(&pipex);
+			}
 		}
 	}
 }
