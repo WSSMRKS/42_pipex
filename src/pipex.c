@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/02 18:37:59 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/02 20:30:06 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,7 @@ char *ft_search_cmd(t_pipex *pipex, int nbcmd)
 {
 	int		i;
 	char	*path;
+	int		sux;
 
 	i = 0;
 	while(pipex->path[i])
@@ -142,11 +143,17 @@ char *ft_search_cmd(t_pipex *pipex, int nbcmd)
 			exit(4);
 		}
 		if (access(path, X_OK) == 0)
+		{
+			sux = 1;
 			break ;
+		}
 		free(path);
 		i++;
 	}
-	return (path);
+	if (sux == 1)
+		return (path);
+	else
+		return (NULL);
 }
 
 int	ft_first_child(t_pipex *pipex)
@@ -168,15 +175,13 @@ int	ft_first_child(t_pipex *pipex)
 	close(pipex->pipe[0][1]);
 	close(pipex->pipe[1][0]);
 	cmdpath = ft_search_cmd(pipex, 1);
-	if (cmdpath == NULL)
-		perror("command not found");
-	else
-	{
+	// if (cmdpath == NULL)
+	// 	ft_printf_err("%s: command not found\n", pipex->cmds[0]);
+	// else
+	// {
 		if (execve(cmdpath, pipex->cmd_args[0], pipex->envp) == -1)
-		{
 			perror("Execve failed!\n");
-		}
-	}
+	// }
 	return (1);
 }
 
@@ -191,15 +196,15 @@ int	ft_child(t_pipex *pipex, int nb_cmd)
 	close(pipex->pipe[1][0]);
 	close(pipex->pipe[1][1]);
 	cmdpath = ft_search_cmd(pipex, nb_cmd);
-	if (cmdpath == NULL)
-		perror("command not found");
-	else
-	{
+	// if (cmdpath == NULL)
+	// 	ft_printf_err("%s: command not found\n", pipex->cmds[nb_cmd - 1]);
+	// else
+	// {
 		if (execve(cmdpath, pipex->cmd_args[nb_cmd - 1], pipex->envp) == -1)
 		{
 			perror("Execve failed!\n");
 		}
-	}
+	// }
 	return (1);
 }
 
@@ -244,18 +249,16 @@ int	ft_parent_process(t_pipex *pipex)
 	close(pipex->pipe[1][0]);
 	close(pipex->pipe[1][1]);
 	cmdpath = ft_search_cmd(pipex, pipex->nb_cmds);
-	if (cmdpath == NULL)
-		perror("command not found");
-	else
-	{
+	// if (cmdpath == NULL)
+	// 	ft_printf_err("%s: command not found\n", pipex->cmds[pipex->nb_cmds - 1]);
+	// else
+	// {
 		cmd_args = pipex->cmd_args[pipex->nb_cmds - 1];
 		pipex->cmd_args[pipex->nb_cmds - 1] = NULL;
 		envp = pipex->envp;
 		if (execve(cmdpath, cmd_args, envp) == -1)
-		{
 			perror("execve failed!\n");
-		}
-	}
+	// }
 	return (1);
 }
 
@@ -286,10 +289,16 @@ int	main(int argc, char **argv, char **envp)
 		return (10);
 	}
 	else if (pid_m == 0)
+	{
 		// if (pipex.mode == here_doc)
 		// 	ft_here_doc(&pipex);
 		// else
-			ft_first_child(&pipex);
+		if (ft_first_child(&pipex) != 0)
+		{
+			ft_printf_err("child 1 error\n");
+			return (1);
+		}
+	}
 	else
 	{
 		i = 2;
