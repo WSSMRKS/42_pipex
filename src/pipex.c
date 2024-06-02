@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/02 18:35:16 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/02 18:37:59 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,9 +131,7 @@ char *ft_search_cmd(t_pipex *pipex, int nbcmd)
 {
 	int		i;
 	char	*path;
-	int		sux;
-	
-	sux = 1;
+
 	i = 0;
 	while(pipex->path[i])
 	{
@@ -143,16 +141,12 @@ char *ft_search_cmd(t_pipex *pipex, int nbcmd)
 			perror("malloc fail!\n");
 			exit(4);
 		}
-		sux = access(path, X_OK);
-		if (sux == 0)
+		if (access(path, X_OK) == 0)
 			break ;
 		free(path);
 		i++;
 	}
-	if (sux == 0)
-		return (path);
-	else
-		return (NULL);
+	return (path);
 }
 
 int	ft_first_child(t_pipex *pipex)
@@ -175,14 +169,13 @@ int	ft_first_child(t_pipex *pipex)
 	close(pipex->pipe[1][0]);
 	cmdpath = ft_search_cmd(pipex, 1);
 	if (cmdpath == NULL)
-	{
-		ft_printf_err("command not found");
-		free(cmdpath);
-	}
+		perror("command not found");
 	else
 	{
 		if (execve(cmdpath, pipex->cmd_args[0], pipex->envp) == -1)
+		{
 			perror("Execve failed!\n");
+		}
 	}
 	return (1);
 }
@@ -197,16 +190,15 @@ int	ft_child(t_pipex *pipex, int nb_cmd)
 	close(pipex->pipe[0][1]);
 	close(pipex->pipe[1][0]);
 	close(pipex->pipe[1][1]);
-	cmdpath = ft_search_cmd(pipex, 1);
+	cmdpath = ft_search_cmd(pipex, nb_cmd);
 	if (cmdpath == NULL)
-	{
-		ft_printf_err("command not found");
-		free(cmdpath);
-	}
+		perror("command not found");
 	else
 	{
-		if (execve(cmdpath, pipex->cmd_args[0], pipex->envp) == -1)
+		if (execve(cmdpath, pipex->cmd_args[nb_cmd - 1], pipex->envp) == -1)
+		{
 			perror("Execve failed!\n");
+		}
 	}
 	return (1);
 }
@@ -232,6 +224,8 @@ int	ft_parent_process(t_pipex *pipex)
 {
 	char	*cmdpath;
 	int		fdout;
+	char	**cmd_args;
+	char	**envp;
 
 	fdout = open(pipex->outfile, O_CREAT | O_RDWR | O_TRUNC, 0644);
 	if (fdout < 0)
@@ -251,14 +245,16 @@ int	ft_parent_process(t_pipex *pipex)
 	close(pipex->pipe[1][1]);
 	cmdpath = ft_search_cmd(pipex, pipex->nb_cmds);
 	if (cmdpath == NULL)
-	{
-		ft_printf_err("command not found");
-		free(cmdpath);
-	}
+		perror("command not found");
 	else
 	{
-		if (execve(cmdpath, pipex->cmd_args[pipex->nb_cmds - 1], pipex->envp) == -1)
+		cmd_args = pipex->cmd_args[pipex->nb_cmds - 1];
+		pipex->cmd_args[pipex->nb_cmds - 1] = NULL;
+		envp = pipex->envp;
+		if (execve(cmdpath, cmd_args, envp) == -1)
+		{
 			perror("execve failed!\n");
+		}
 	}
 	return (1);
 }
