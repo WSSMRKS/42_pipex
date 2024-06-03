@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/02 18:07:16 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/03 11:57:06 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 # include <string.h>
+# include <errno.h>
 
 //libft
 # ifndef BUFFER_SIZE
@@ -36,6 +37,23 @@
 #  define MAX_FD 1048
 # endif
 //current project
+// # define USAGE "[infile | here_doc LIMITER] cmd1 cmd2 ... cmdn outfile"
+// # define NO_CMD "command not found"
+// # define HEREDOC ".temp_pipex_heredoc_file"
+// # define MAX_PATH_SIZE		1024
+// # define MALLOC_FAIL		42
+// # define OPEN_FAIL			2
+// # define CLOSE_FAIL			3
+// # define FORK_FAIL			4
+// # define PIPE_FAIL			5
+// # define DUP_FAIL			6
+// # define EXECVE_FAIL		127
+// # define WRITE_FAIL			8
+// # define READ_FAIL			9
+// # define TOO_FEW_ARGS		10
+// # define WAIT_FAIL			11
+// # define ARGS_FAIL			12
+// # define CMD_FAIL			-1
 
 typedef enum e_case
 {
@@ -43,20 +61,21 @@ typedef enum e_case
 	base_case,
 	bonus_case,
 	here_doc
-} t_case;
+}				t_case;
 
 typedef enum e_bool
 {
 	false,
 	true
-} t_bool;
+}				t_bool;
 
+/* 1 = string, 2 = 2d-array, 3 = 3d-array, 0 = empty */
 typedef struct s_list
 {
 	void			*cont;
-	int				type; // 1 = string, 2 = 2d-array, 3 = 3d-array, 0 = empty
+	int				type;
 	struct s_list	*next;
-}					t_list;
+}				t_list;
 
 typedef struct s_pipex {
 	int		argc;
@@ -64,6 +83,7 @@ typedef struct s_pipex {
 	char	**envp;
 	char	**path;
 	char	**cmds;
+	int		*cmd_ret;
 	char	***cmd_args;
 	int		pipe[2][2];
 	int		mode;
@@ -142,8 +162,6 @@ int		ft_first_child(t_pipex *pipex);
 int		ft_parent_process(t_pipex *pipex);
 void	ft_cleanup(t_pipex *pipex);
 int		ft_child(t_pipex *pipex, int nb_cmd);
-
-
-
+int		ft_errhandle(t_pipex *pipex, int nb);
 
 #endif
