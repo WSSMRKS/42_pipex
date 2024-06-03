@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/03 12:39:54 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/03 17:55:23 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,8 @@ typedef struct s_pipex {
 	char	**envp;
 	char	**path;
 	char	**cmds;
-	int		*cmd_ret;
+	int		*child_ret;
+	int		*child_pids;
 	char	***cmd_args;
 	int		pipe[2][2];
 	int		mode;
@@ -161,5 +162,7 @@ int		ft_parent_process(t_pipex *pipex);
 void	ft_cleanup(t_pipex *pipex);
 int		ft_child(t_pipex *pipex, int nb_cmd);
 int		ft_errhandle(t_pipex *pipex, int nb);
+void	ft_close_all_fds(t_pipex *pipex);
+
 
 #endif

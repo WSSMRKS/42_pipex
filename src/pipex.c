@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/03 12:47:22 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/03 19:02:19 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,8 @@ void	ft_parse_cmds(t_pipex *pipex)
 	else
 		pipex->infile = ft_strdup(pipex->argv[1]);
 	i = -1;
-	pipex->cmd_ret = ft_calloc(sizeof(int), nb_cmds - pipex->mode + 2);
+	pipex->child_ret = ft_calloc(sizeof(int), nb_cmds - pipex->mode + 1);
+	pipex->child_pids = ft_calloc(sizeof(int), nb_cmds - pipex->mode + 1);
 	pipex->outfile = ft_strdup(pipex->argv[pipex->argc - 1]);
 	pipex->cmd_args = ft_calloc(sizeof(char **), nb_cmds - pipex->mode + 1);
 	pipex->cmds = ft_calloc(sizeof(char *), nb_cmds - pipex->mode + 1);
@@ -69,6 +70,7 @@ void	ft_parse_cmds(t_pipex *pipex)
 	{
 		pipex->cmd_args[i] = ft_split(pipex->argv[i + 2 + pipex->mode], ' ');
 		pipex->cmds[i] = ft_strdup(pipex->cmd_args[i][0]);
+		ft_printf_err("cmds[%d]: {%s}\n", i, pipex->cmds[i]);
 	}
 	pipex->nb_cmds = nb_cmds - pipex->mode;
 	pipex->cmd_args[i] = NULL;
@@ -146,70 +148,75 @@ char	*ft_search_cmd(t_pipex *pipex, int nbcmd)
 		return (NULL);
 }
 
+void ft_close_all_fds(t_pipex *pipex)
+{
+	if (close(pipex->pipe[0][0]) || close(pipex->pipe[0][1])
+		|| close(pipex->pipe[1][0]) || close(pipex->pipe[1][1]))
+		perror("pipex");
+}
+
+// ft_close_fds(t_pipex *pipex, int nb_cmd)
+// {
+// 	if (nb_cmd == 1)
+// 	{
+// 		close(pipex->pipe[1][0]);
+// 		close(pipex->pipe[1][1]);
+// 	}
+// 	else if (nb_cmd == pipex->nb_cmds)
+// 	{
+// 		close(pipex->pipe[0][0]);
+// 		close(pipex->pipe[0][1]);
+// 	}
+// 	else
+// 	{
+// 		close(pipex->pipe[(nb_cmd - 1) & 1][0]);
+// 		close(pipex->pipe[(nb_cmd - 1) & 1][1]);
+// 	}
+// }
+
 int	ft_first_child(t_pipex *pipex)
 {
 	int		fdin;
 	char	*cmdpath;
+	int		err;
 
 	fdin = open(pipex->infile, O_RDONLY);
 	if (fdin < 0)
 	{
-		pipex->cmd_ret[0] = errno;
-		ft_errhandle(pipex, 0);
 		ft_cleanup(pipex);
-		exit (1);
+		exit (errno);
 	}
 	dup2(fdin, STDIN_FILENO);
 	dup2(pipex->pipe[1][1], STDOUT_FILENO);
 	close(fdin);
-	close(pipex->pipe[1][1]);
-	close(pipex->pipe[0][0]);
-	close(pipex->pipe[0][1]);
-	close(pipex->pipe[1][0]);
+	ft_close_all_fds(pipex);
 	cmdpath = ft_search_cmd(pipex, 1);
 	if (cmdpath == NULL)
-	{
-		pipex->cmd_ret[1] = 313;
-		ft_errhandle(pipex, 1);
-	}
+		err = 127;
 	else
-	{
-		if (execve(cmdpath, pipex->cmd_args[0], pipex->envp) == -1)
-		{
-			pipex->cmd_ret[1] = 4;
-			ft_errhandle(pipex, 1);
-		}
-	}
+		err = execve(cmdpath, pipex->cmd_args[0], pipex->envp);
+	free(cmdpath);
 	ft_cleanup(pipex);
-	exit(1);
+	exit(err);
 }
 
 int	ft_child(t_pipex *pipex, int nb_cmd)
 {
 	char	*cmdpath;
+	int		err;
 
+	err = 0;
 	dup2(pipex->pipe[(nb_cmd - 1) & 1][0], STDIN_FILENO);
 	dup2(pipex->pipe[nb_cmd & 1][1], STDOUT_FILENO);
-	close(pipex->pipe[0][0]);
-	close(pipex->pipe[0][1]);
-	close(pipex->pipe[1][0]);
-	close(pipex->pipe[1][1]);
+	ft_close_all_fds(pipex);
 	cmdpath = ft_search_cmd(pipex, nb_cmd);
 	if (cmdpath == NULL)
-	{
-		pipex->cmd_ret[nb_cmd] = 313;
-		ft_errhandle(pipex, nb_cmd);
-	}
+		err = 127;
 	else
-	{
-		if (execve(cmdpath, pipex->cmd_args[nb_cmd - 1], pipex->envp) == -1)
-		{
-			pipex->cmd_ret[nb_cmd] = 4;
-			ft_errhandle(pipex, nb_cmd);
-		}
-	}
+		err = execve(cmdpath, pipex->cmd_args[nb_cmd - 1], pipex->envp);
+	free(cmdpath);
 	ft_cleanup(pipex);
-	exit (1);
+	exit(err);
 }
 
 void	ft_cleanup(t_pipex *pipex)
@@ -222,8 +229,8 @@ void	ft_cleanup(t_pipex *pipex)
 		free(pipex->outfile);
 	if (pipex->cmds)
 		ft_free_2d(pipex->cmds);
-	if (pipex->cmd_ret)
-		free(pipex->cmd_ret);
+	if (pipex->child_ret)
+		free(pipex->child_ret);
 	if (pipex->path)
 		ft_free_2d(pipex->path);
 	if (pipex->cmd_args)
@@ -234,15 +241,14 @@ int	ft_parent_process(t_pipex *pipex)
 {
 	char	*cmdpath;
 	int		fdout;
-	char	**cmd_args;
-	char	**envp;
+	int		err;
 
+	err = 0;
 	fdout = open(pipex->outfile, O_CREAT | O_RDWR | O_TRUNC, 0644);
 	if (fdout < 0)
 	{
-		ft_printf_err("pipex: %s: %s\n", pipex->outfile, strerror(errno));
 		ft_cleanup(pipex);
-		exit (1);
+		exit (errno);
 	}
 	else
 	{
@@ -250,43 +256,45 @@ int	ft_parent_process(t_pipex *pipex)
 		close(fdout);
 	}
 	dup2(pipex->pipe[(pipex->nb_cmds -1) & 1][0], STDIN_FILENO);
-	close(pipex->pipe[0][0]);
-	close(pipex->pipe[0][1]);
-	close(pipex->pipe[1][0]);
-	close(pipex->pipe[1][1]);
+	ft_close_all_fds(pipex);
 	cmdpath = ft_search_cmd(pipex, pipex->nb_cmds);
 	if (cmdpath == NULL)
-	{
-		pipex->cmd_ret[pipex->nb_cmds] = 313;
-		ft_errhandle(pipex, pipex->nb_cmds);
-	}
+		err = 127;
 	else
-	{
-		cmd_args = pipex->cmd_args[pipex->nb_cmds - 1];
-		pipex->cmd_args[pipex->nb_cmds - 1] = NULL;
-		envp = pipex->envp;
-		if (execve(cmdpath, cmd_args, envp) == -1)
-		{
-			pipex->cmd_ret[pipex->nb_cmds] = 4;
-			ft_errhandle(pipex, pipex->nb_cmds);
-		}
-	}
+		err = execve(cmdpath, pipex->cmd_args[pipex->nb_cmds - 1], pipex->envp);
+	free(cmdpath);
 	ft_cleanup(pipex);
-	exit (1);
+	exit(err);
 }
 
-int	ft_errhandle(t_pipex *pipex, int nb)
+int	ft_wait_error(t_pipex *pipex)
 {
-	if (pipex->cmd_ret[nb] == 13)
-		ft_printf_err("pipex: %s: Permission denied\n", pipex->infile);
-	if (pipex->cmd_ret[nb] == 2)
-		ft_printf_err("pipex: %s: No such file or directory\n", pipex->infile);
-	if (pipex->cmd_ret[nb] == 313)
-		ft_printf_err("%s: command not found\n", pipex->cmds[nb - 1]);
-	if (pipex->cmd_ret[nb] == 4)
-		ft_printf_err("pipex: %s: execve error\n", pipex->cmds[nb - 1]);
-	return (1);
+	int	i;
+	int	err;
+
+	i = 0;
+	err = 0;
+	while (i < pipex->nb_cmds)
+	{
+		pipex->child_ret[i] = 0;
+		waitpid(pipex->child_pids[i], &(pipex->child_ret[i]), 0);
+		if (WIFEXITED(pipex->child_ret[i]) && WEXITSTATUS(pipex->child_ret[i]) != 0)
+		{
+			// ft_printf_err("exited, status=%d\n, for child nr %d\n with pid %d\n", WEXITSTATUS(pipex->child_ret[i]), i, pipex->child_pids[i]);
+			ft_printf_err("Actual value of pipex->child_ret[i]: {%d} for i nbr {%d}\n", pipex->child_ret[i], i);
+			// ft_printf_err("exited, status=%d\n, for child nr %d\n", WEXITSTATUS(pipex->child_ret[i]), i);
+			// if (WEXITSTATUS(pipex->child_ret[i]) == 127)
+			// 	ft_printf_err("%s: command not found\n", pipex->cmds[i]);
+			// else
+				ft_printf_err("pipex: %s\n", strerror(WEXITSTATUS(pipex->child_ret[i])));
+			err = 1;
+		}
+		i++;
+	}
+	ft_cleanup(pipex);
+	exit(err);
 }
+
 
 /* 	main function of project pipex.
 	Input syntax: ./pipex infile cmd1 ... cmdn outfile
@@ -294,12 +302,9 @@ int	ft_errhandle(t_pipex *pipex, int nb)
 */
 int	main(int argc, char **argv, char **envp)
 {
-	int		pid_m;
-	int		pid_n;
 	t_pipex	pipex;
 	int		i;
 
-	pid_n = -5;
 	ft_init_env(&pipex, &argc, argv, envp);
 	if (pipe(pipex.pipe[0]) == -1 || pipe(pipex.pipe[1]) == -1)
 	{
@@ -309,13 +314,13 @@ int	main(int argc, char **argv, char **envp)
 	ft_validate_args(&pipex);
 	ft_parse_cmds(&pipex);
 	pipex.path = ft_grab_envp(pipex.envp);
-	pid_m = fork();
-	if (pid_m < 0)
+	pipex.child_pids[0] = fork();
+	if (pipex.child_pids[0] < 0)
 	{
 		strerror(10);
 		return (10);
 	}
-	else if (pid_m == 0)
+	else if (pipex.child_pids[0] == 0)
 	{
 		// if (pipex.mode == here_doc)
 		// 	ft_here_doc(&pipex);
@@ -324,32 +329,27 @@ int	main(int argc, char **argv, char **envp)
 	}
 	else
 	{
-		i = 2;
-		while (pid_n != 0 && i < pipex.nb_cmds)
+		i = 1;
+		pipex.child_pids[i] = -5;
+		while (pipex.child_pids[i++] != 0 && i < pipex.nb_cmds)
 		{
-			waitpid(-1, NULL, 0);
-			pid_n = fork();
-			if (pid_n == 0)
+			pipex.child_pids[i] = fork();
+			if (pipex.child_pids[i] == 0)
 				ft_child(&pipex, i);
 			if (close(pipex.pipe[(i - 1) & 1][0])
 				|| close(pipex.pipe[(i - 1) & 1][1]))
 				perror("pipex");
 			pipe(pipex.pipe[(i - 1) & 1]);
-			i++;
 		}
-		if (pid_n != 0)
+		pipex.child_pids[i] = fork();
+		if (pipex.child_pids[i] == 0)
 		{
-			pid_n = fork();
-			if (pid_n == 0)
-			{
-				waitpid(-1, NULL, 0);
-				ft_parent_process(&pipex);
-			}
-			else
-			{
-				waitpid(-1, NULL, 0);
-				ft_cleanup(&pipex);
-			}
+			ft_parent_process(&pipex);
+		}
+		else
+		{
+			ft_wait_error(&pipex);
+			ft_cleanup(&pipex);
 		}
 	}
 }
