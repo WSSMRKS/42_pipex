@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/03 11:57:06 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/03 12:39:54 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,9 +57,7 @@
 
 typedef enum e_case
 {
-	error_case,
-	base_case,
-	bonus_case,
+	normal_case,
 	here_doc
 }				t_case;
 

@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/03 12:09:12 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/03 12:47:22 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ void	ft_validate_args(t_pipex *pipex)
 	if (pipex->argc < 5)
 	{
 		ft_printf_err("Error: Wrong number of arguments\n");
-		pipex->mode = error_case;
 		exit(1);
 	}
 	else if (ft_strncmp(pipex->argv[1], "here_doc", 8) == 0)
@@ -45,10 +44,8 @@ void	ft_validate_args(t_pipex *pipex)
 			exit(2);
 		}
 	}
-	else if (pipex->argc > 5)
-		pipex->mode = bonus_case;
 	else
-		pipex->mode = base_case;
+		pipex->mode = normal_case;
 }
 
 /* Function to destinguish between cases, parse as well as
@@ -57,29 +54,23 @@ void	ft_parse_cmds(t_pipex *pipex)
 {
 	int	nb_cmds;
 	int	i;
-	int	offset;
 
-	offset = 2;
 	nb_cmds = pipex->argc - 3;
 	if (pipex->mode == here_doc)
-	{
-		offset++;
-		nb_cmds--;
 		pipex->delimiter = ft_strdup(pipex->argv[2]);
-	}
 	else
 		pipex->infile = ft_strdup(pipex->argv[1]);
 	i = -1;
-	pipex->cmd_ret = ft_calloc(sizeof(int), nb_cmds + 2);
+	pipex->cmd_ret = ft_calloc(sizeof(int), nb_cmds - pipex->mode + 2);
 	pipex->outfile = ft_strdup(pipex->argv[pipex->argc - 1]);
-	pipex->cmd_args = ft_calloc(sizeof(char **), nb_cmds + 1);
-	pipex->cmds = ft_calloc(sizeof(char *), nb_cmds + 1);
-	while (++i < nb_cmds)
+	pipex->cmd_args = ft_calloc(sizeof(char **), nb_cmds - pipex->mode + 1);
+	pipex->cmds = ft_calloc(sizeof(char *), nb_cmds - pipex->mode + 1);
+	while (++i < nb_cmds - pipex->mode)
 	{
-		pipex->cmd_args[i] = ft_split(pipex->argv[i + offset], ' ');
+		pipex->cmd_args[i] = ft_split(pipex->argv[i + 2 + pipex->mode], ' ');
 		pipex->cmds[i] = ft_strdup(pipex->cmd_args[i][0]);
 	}
-	pipex->nb_cmds = nb_cmds;
+	pipex->nb_cmds = nb_cmds - pipex->mode;
 	pipex->cmd_args[i] = NULL;
 	pipex->cmds[i] = NULL;
 }
@@ -90,12 +81,11 @@ char	**ft_grab_envp(char **envp)
 	char	**paths;
 	char	*tmp;
 
-	i = 0;
-	while (envp && envp[i])
+	i = -1;
+	while (envp && envp[++i])
 	{
 		if (ft_strncmp(envp[i], "PATH=", 5) == 0)
 			break ;
-		i++;
 	}
 	paths = ft_split(&envp[i][5], ':');
 	if (paths == NULL)
@@ -133,9 +123,9 @@ char	*ft_search_cmd(t_pipex *pipex, int nbcmd)
 	char	*path;
 	int		sux;
 
-	i = 0;
+	i = -1;
 	sux = 0;
-	while (pipex->path[i])
+	while (pipex->path[++i])
 	{
 		path = ft_strjoin(pipex->path[i], pipex->cmds[nbcmd - 1]);
 		if (path == NULL)
@@ -149,7 +139,6 @@ char	*ft_search_cmd(t_pipex *pipex, int nbcmd)
 			break ;
 		}
 		free(path);
-		i++;
 	}
 	if (sux == 1)
 		return (path);
@@ -338,6 +327,7 @@ int	main(int argc, char **argv, char **envp)
 		i = 2;
 		while (pid_n != 0 && i < pipex.nb_cmds)
 		{
+			waitpid(-1, NULL, 0);
 			pid_n = fork();
 			if (pid_n == 0)
 				ft_child(&pipex, i);
@@ -351,7 +341,10 @@ int	main(int argc, char **argv, char **envp)
 		{
 			pid_n = fork();
 			if (pid_n == 0)
+			{
+				waitpid(-1, NULL, 0);
 				ft_parent_process(&pipex);
+			}
 			else
 			{
 				waitpid(-1, NULL, 0);
