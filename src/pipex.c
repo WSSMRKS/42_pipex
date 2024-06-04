@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/03 19:02:19 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/04 12:46:20 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -281,12 +281,19 @@ int	ft_wait_error(t_pipex *pipex)
 		if (WIFEXITED(pipex->child_ret[i]) && WEXITSTATUS(pipex->child_ret[i]) != 0)
 		{
 			// ft_printf_err("exited, status=%d\n, for child nr %d\n with pid %d\n", WEXITSTATUS(pipex->child_ret[i]), i, pipex->child_pids[i]);
-			ft_printf_err("Actual value of pipex->child_ret[i]: {%d} for i nbr {%d}\n", pipex->child_ret[i], i);
+			ft_printf_err("Actual value of pipex->child_ret[i]: {%d} for i nbr {%d}\nError code: %d, strerror: %s\n", pipex->child_ret[i], i, WEXITSTATUS(pipex->child_ret[i]), strerror(WEXITSTATUS(pipex->child_ret[i])));
 			// ft_printf_err("exited, status=%d\n, for child nr %d\n", WEXITSTATUS(pipex->child_ret[i]), i);
-			// if (WEXITSTATUS(pipex->child_ret[i]) == 127)
-			// 	ft_printf_err("%s: command not found\n", pipex->cmds[i]);
-			// else
-				ft_printf_err("pipex: %s\n", strerror(WEXITSTATUS(pipex->child_ret[i])));
+			if (WEXITSTATUS(pipex->child_ret[i]) == 127)
+				ft_printf_err("%s: command not found\n", pipex->cmds[i - 1]);
+			else if (WEXITSTATUS(pipex->child_ret[i]) == 13 || WEXITSTATUS(pipex->child_ret[i]) == 2)
+			{
+				if (i == 0)
+					ft_printf_err("pipex: %s: %s\n", pipex->infile, strerror(WEXITSTATUS(pipex->child_ret[i])));
+				else
+					ft_printf_err("pipex: %s: %s\n", pipex->outfile, strerror(WEXITSTATUS(pipex->child_ret[i])));
+			}
+			else
+				ft_printf_err("%s: %s\n", pipex->cmds[i - 1], strerror(WEXITSTATUS(pipex->child_ret[i])));
 			err = 1;
 		}
 		i++;
@@ -333,6 +340,7 @@ int	main(int argc, char **argv, char **envp)
 		pipex.child_pids[i] = -5;
 		while (pipex.child_pids[i++] != 0 && i < pipex.nb_cmds)
 		{
+			ft_printf_err("value of i: %d inside loop\n", i);
 			pipex.child_pids[i] = fork();
 			if (pipex.child_pids[i] == 0)
 				ft_child(&pipex, i);
@@ -341,6 +349,7 @@ int	main(int argc, char **argv, char **envp)
 				perror("pipex");
 			pipe(pipex.pipe[(i - 1) & 1]);
 		}
+		ft_printf_err("value of i: %d\n", i);
 		pipex.child_pids[i] = fork();
 		if (pipex.child_pids[i] == 0)
 		{
