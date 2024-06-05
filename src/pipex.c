@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/04 12:46:20 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/05 09:38:47 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,7 +213,7 @@ int	ft_child(t_pipex *pipex, int nb_cmd)
 	if (cmdpath == NULL)
 		err = 127;
 	else
-		err = execve(cmdpath, pipex->cmd_args[nb_cmd - 1], pipex->envp);
+		err = execve(cmdpath, pipex->cmd_args[nb_cmd], pipex->envp);
 	free(cmdpath);
 	ft_cleanup(pipex);
 	exit(err);
@@ -338,7 +338,7 @@ int	main(int argc, char **argv, char **envp)
 	{
 		i = 1;
 		pipex.child_pids[i] = -5;
-		while (pipex.child_pids[i++] != 0 && i < pipex.nb_cmds)
+		while (pipex.child_pids[i] != 0 && i < pipex.nb_cmds)
 		{
 			ft_printf_err("value of i: %d inside loop\n", i);
 			pipex.child_pids[i] = fork();
@@ -348,6 +348,7 @@ int	main(int argc, char **argv, char **envp)
 				|| close(pipex.pipe[(i - 1) & 1][1]))
 				perror("pipex");
 			pipe(pipex.pipe[(i - 1) & 1]);
+			i++;
 		}
 		ft_printf_err("value of i: %d\n", i);
 		pipex.child_pids[i] = fork();
