@@ -254,6 +254,7 @@ int	ft_parent_process(t_pipex *pipex)
 		err = execve(cmdpath, pipex->cmd_args[pipex->nb_cmds - 1], pipex->envp);
 	free(cmdpath);
 	ft_cleanup(pipex);
+	ft_printf_err("ft_parent_process about to terminate\n");
 	exit (err);
 }
 
