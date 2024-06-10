@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
+/*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/03 11:57:06 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/10 23:23:27 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,5 +163,6 @@ int		ft_parent_process(t_pipex *pipex);
 void	ft_cleanup(t_pipex *pipex);
 int		ft_child(t_pipex *pipex, int nb_cmd);
 int		ft_errhandle(t_pipex *pipex, int nb);
+void 	ft_close_all_fds(t_pipex *pipex);
 
 #endif

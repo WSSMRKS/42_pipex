@@ -3,129 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
+/*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/03 12:09:12 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/10 23:23:52 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/pipex.h"
-
-void	ft_init_env(t_pipex *pipex, int *argc, char **argv, char **envp)
-{
-	pipex->argc = *argc;
-	pipex->argv = argv;
-	pipex->envp = envp;
-	pipex->path = NULL;
-	pipex->cmds = NULL;
-	pipex->cmd_args = NULL;
-	pipex->mode = 0;
-	pipex->delimiter = NULL;
-	pipex->infile = NULL;
-	pipex->outfile = NULL;
-	pipex->nb_cmds = 0;
-}
-
-void	ft_validate_args(t_pipex *pipex)
-{
-	if (pipex->argc < 5)
-	{
-		ft_printf_err("Error: Wrong number of arguments\n");
-		pipex->mode = error_case;
-		exit(1);
-	}
-	else if (ft_strncmp(pipex->argv[1], "here_doc", 8) == 0)
-	{
-		if (pipex->argc == 6)
-			pipex->mode = here_doc;
-		else
-		{
-			ft_printf_err("Error: Wrong number of arguments for here_doc\n");
-			exit(2);
-		}
-	}
-	else if (pipex->argc > 5)
-		pipex->mode = bonus_case;
-	else
-		pipex->mode = base_case;
-}
-
-/* Function to destinguish between cases, parse as well as
-allocate the commands, args and the in-/outfile */
-void	ft_parse_cmds(t_pipex *pipex)
-{
-	int	nb_cmds;
-	int	i;
-	int	offset;
-
-	offset = 2;
-	nb_cmds = pipex->argc - 3;
-	if (pipex->mode == here_doc)
-	{
-		offset++;
-		nb_cmds--;
-		pipex->delimiter = ft_strdup(pipex->argv[2]);
-	}
-	else
-		pipex->infile = ft_strdup(pipex->argv[1]);
-	i = -1;
-	pipex->cmd_ret = ft_calloc(sizeof(int), nb_cmds + 2);
-	pipex->outfile = ft_strdup(pipex->argv[pipex->argc - 1]);
-	pipex->cmd_args = ft_calloc(sizeof(char **), nb_cmds + 1);
-	pipex->cmds = ft_calloc(sizeof(char *), nb_cmds + 1);
-	while (++i < nb_cmds)
-	{
-		pipex->cmd_args[i] = ft_split(pipex->argv[i + offset], ' ');
-		pipex->cmds[i] = ft_strdup(pipex->cmd_args[i][0]);
-	}
-	pipex->nb_cmds = nb_cmds;
-	pipex->cmd_args[i] = NULL;
-	pipex->cmds[i] = NULL;
-}
-
-char	**ft_grab_envp(char **envp)
-{
-	int		i;
-	char	**paths;
-	char	*tmp;
-
-	i = 0;
-	while (envp && envp[i])
-	{
-		if (ft_strncmp(envp[i], "PATH=", 5) == 0)
-			break ;
-		i++;
-	}
-	paths = ft_split(&envp[i][5], ':');
-	if (paths == NULL)
-		return (NULL);
-	i = 0;
-	while (paths[i])
-	{
-		if (paths[i][ft_strlen(paths[i]) - 1] != '/')
-		{
-			tmp = paths[i];
-			paths[i] = ft_strjoin(paths[i], "/\0");
-			free(tmp);
-		}
-		i++;
-	}
-	return (paths);
-}
-
-t_list	*ft_pipex_lstnew(void *cont, int type)
-{
-	t_list	*test;
-
-	test = malloc(sizeof(t_list));
-	if (!test)
-		return (NULL);
-	test->cont = cont;
-	test->type = type;
-	test->next = NULL;
-	return (test);
-}
 
 char	*ft_search_cmd(t_pipex *pipex, int nbcmd)
 {
@@ -157,6 +42,7 @@ char	*ft_search_cmd(t_pipex *pipex, int nbcmd)
 		return (NULL);
 }
 
+
 int	ft_first_child(t_pipex *pipex)
 {
 	int		fdin;
@@ -173,14 +59,11 @@ int	ft_first_child(t_pipex *pipex)
 	dup2(fdin, STDIN_FILENO);
 	dup2(pipex->pipe[1][1], STDOUT_FILENO);
 	close(fdin);
-	close(pipex->pipe[1][1]);
-	close(pipex->pipe[0][0]);
-	close(pipex->pipe[0][1]);
-	close(pipex->pipe[1][0]);
+	ft_close_all_fds(pipex);
 	cmdpath = ft_search_cmd(pipex, 1);
 	if (cmdpath == NULL)
 	{
-		pipex->cmd_ret[1] = 313;
+		pipex->cmd_ret[1] = 127;
 		ft_errhandle(pipex, 1);
 	}
 	else
@@ -201,14 +84,11 @@ int	ft_child(t_pipex *pipex, int nb_cmd)
 
 	dup2(pipex->pipe[(nb_cmd - 1) & 1][0], STDIN_FILENO);
 	dup2(pipex->pipe[nb_cmd & 1][1], STDOUT_FILENO);
-	close(pipex->pipe[0][0]);
-	close(pipex->pipe[0][1]);
-	close(pipex->pipe[1][0]);
-	close(pipex->pipe[1][1]);
+	ft_close_all_fds(pipex);
 	cmdpath = ft_search_cmd(pipex, nb_cmd);
 	if (cmdpath == NULL)
 	{
-		pipex->cmd_ret[nb_cmd] = 313;
+		pipex->cmd_ret[nb_cmd] = 127;
 		ft_errhandle(pipex, nb_cmd);
 	}
 	else
@@ -261,14 +141,11 @@ int	ft_parent_process(t_pipex *pipex)
 		close(fdout);
 	}
 	dup2(pipex->pipe[(pipex->nb_cmds -1) & 1][0], STDIN_FILENO);
-	close(pipex->pipe[0][0]);
-	close(pipex->pipe[0][1]);
-	close(pipex->pipe[1][0]);
-	close(pipex->pipe[1][1]);
+	ft_close_all_fds(pipex);
 	cmdpath = ft_search_cmd(pipex, pipex->nb_cmds);
 	if (cmdpath == NULL)
 	{
-		pipex->cmd_ret[pipex->nb_cmds] = 313;
+		pipex->cmd_ret[pipex->nb_cmds] = 127;
 		ft_errhandle(pipex, pipex->nb_cmds);
 	}
 	else
@@ -292,7 +169,7 @@ int	ft_errhandle(t_pipex *pipex, int nb)
 		ft_printf_err("pipex: %s: Permission denied\n", pipex->infile);
 	if (pipex->cmd_ret[nb] == 2)
 		ft_printf_err("pipex: %s: No such file or directory\n", pipex->infile);
-	if (pipex->cmd_ret[nb] == 313)
+	if (pipex->cmd_ret[nb] == 127)
 		ft_printf_err("%s: command not found\n", pipex->cmds[nb - 1]);
 	if (pipex->cmd_ret[nb] == 4)
 		ft_printf_err("pipex: %s: execve error\n", pipex->cmds[nb - 1]);
