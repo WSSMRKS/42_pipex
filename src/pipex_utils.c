@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:19:29 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/10 23:47:48 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/10 23:51:47 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,4 +61,22 @@ char	**ft_grab_envp(char **envp)
 		}
 	}
 	return (paths);
+}
+
+void	ft_cleanup(t_pipex *pipex)
+{
+	if (pipex->delimiter)
+		free(pipex->delimiter);
+	if (pipex->infile)
+		free(pipex->infile);
+	if (pipex->outfile)
+		free(pipex->outfile);
+	if (pipex->cmds)
+		ft_free_2d(pipex->cmds);
+	if (pipex->cmd_ret)
+		free(pipex->cmd_ret);
+	if (pipex->path)
+		ft_free_2d(pipex->path);
+	if (pipex->cmd_args)
+		ft_free_3d(pipex->cmd_args);
 }

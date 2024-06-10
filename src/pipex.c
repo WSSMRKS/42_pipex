@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/10 23:42:16 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/10 23:59:00 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,13 @@ int	ft_first_child(t_pipex *pipex)
 {
 	int		fdin;
 	char	*cmdpath;
+	int		err;
 
 	fdin = open(pipex->infile, O_RDONLY);
 	if (fdin < 0)
 	{
-		pipex->cmd_ret[0] = errno;
-		ft_errhandle(pipex, 0);
 		ft_cleanup(pipex);
-		exit (1);
+		exit (errno);
 	}
 	dup2(fdin, STDIN_FILENO);
 	dup2(pipex->pipe[1][1], STDOUT_FILENO);
@@ -31,78 +30,43 @@ int	ft_first_child(t_pipex *pipex)
 	ft_close_all_fds(pipex);
 	cmdpath = ft_search_cmd(pipex, 1);
 	if (cmdpath == NULL)
-	{
-		pipex->cmd_ret[1] = 127;
-		ft_errhandle(pipex, 1);
-	}
+		err = 127;
 	else
-	{
-		if (execve(cmdpath, pipex->cmd_args[0], pipex->envp) == -1)
-		{
-			pipex->cmd_ret[1] = 4;
-			ft_errhandle(pipex, 1);
-		}
-	}
+		err = execve(cmdpath, pipex->cmd_args[0], pipex->envp);
 	ft_cleanup(pipex);
-	exit(1);
+	exit(err);
 }
 
 int	ft_child(t_pipex *pipex, int nb_cmd)
 {
 	char	*cmdpath;
+	int		err;
 
 	dup2(pipex->pipe[(nb_cmd - 1) & 1][0], STDIN_FILENO);
 	dup2(pipex->pipe[nb_cmd & 1][1], STDOUT_FILENO);
 	ft_close_all_fds(pipex);
 	cmdpath = ft_search_cmd(pipex, nb_cmd);
 	if (cmdpath == NULL)
-	{
-		pipex->cmd_ret[nb_cmd] = 127;
-		ft_errhandle(pipex, nb_cmd);
-	}
+		err = 127;
 	else
 	{
-		if (execve(cmdpath, pipex->cmd_args[nb_cmd - 1], pipex->envp) == -1)
-		{
-			pipex->cmd_ret[nb_cmd] = 4;
-			ft_errhandle(pipex, nb_cmd);
-		}
+		err = execve(cmdpath, pipex->cmd_args[0], pipex->envp);
 	}
 	ft_cleanup(pipex);
-	exit (1);
-}
-
-void	ft_cleanup(t_pipex *pipex)
-{
-	if (pipex->delimiter)
-		free(pipex->delimiter);
-	if (pipex->infile)
-		free(pipex->infile);
-	if (pipex->outfile)
-		free(pipex->outfile);
-	if (pipex->cmds)
-		ft_free_2d(pipex->cmds);
-	if (pipex->cmd_ret)
-		free(pipex->cmd_ret);
-	if (pipex->path)
-		ft_free_2d(pipex->path);
-	if (pipex->cmd_args)
-		ft_free_3d(pipex->cmd_args);
+	exit (err);
 }
 
 int	ft_parent_process(t_pipex *pipex)
 {
 	char	*cmdpath;
 	int		fdout;
-	char	**cmd_args;
-	char	**envp;
+	int		err;
 
 	fdout = open(pipex->outfile, O_CREAT | O_RDWR | O_TRUNC, 0644);
 	if (fdout < 0)
 	{
-		ft_printf_err("pipex: %s: %s\n", pipex->outfile, strerror(errno));
 		ft_cleanup(pipex);
-		exit (1);
+		exit (errno);
 	}
 	else
 	{
@@ -113,36 +77,11 @@ int	ft_parent_process(t_pipex *pipex)
 	ft_close_all_fds(pipex);
 	cmdpath = ft_search_cmd(pipex, pipex->nb_cmds);
 	if (cmdpath == NULL)
-	{
-		pipex->cmd_ret[pipex->nb_cmds] = 127;
-		ft_errhandle(pipex, pipex->nb_cmds);
-	}
+		err = 127;
 	else
-	{
-		cmd_args = pipex->cmd_args[pipex->nb_cmds - 1];
-		pipex->cmd_args[pipex->nb_cmds - 1] = NULL;
-		envp = pipex->envp;
-		if (execve(cmdpath, cmd_args, envp) == -1)
-		{
-			pipex->cmd_ret[pipex->nb_cmds] = 4;
-			ft_errhandle(pipex, pipex->nb_cmds);
-		}
-	}
+		err = execve(cmdpath, pipex->cmd_args[pipex->nb_cmds - 1], pipex->envp);
 	ft_cleanup(pipex);
-	exit (1);
-}
-
-int	ft_errhandle(t_pipex *pipex, int nb)
-{
-	if (pipex->cmd_ret[nb] == 13)
-		ft_printf_err("pipex: %s: Permission denied\n", pipex->infile);
-	if (pipex->cmd_ret[nb] == 2)
-		ft_printf_err("pipex: %s: No such file or directory\n", pipex->infile);
-	if (pipex->cmd_ret[nb] == 127)
-		ft_printf_err("%s: command not found\n", pipex->cmds[nb - 1]);
-	if (pipex->cmd_ret[nb] == 4)
-		ft_printf_err("pipex: %s: execve error\n", pipex->cmds[nb - 1]);
-	return (1);
+	exit (err);
 }
 
 /* 	main function of project pipex.
