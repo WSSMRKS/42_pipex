@@ -83,7 +83,8 @@ typedef struct s_pipex {
 	char	**envp;
 	char	**path;
 	char	**cmds;
-	int		*cmd_ret;
+	int		*child_ret;
+	int		*child_pids;
 	char	***cmd_args;
 	int		pipe[2][2];
 	int		mode;
