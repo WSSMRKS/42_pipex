@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:19:29 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/10 23:23:18 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/10 23:47:48 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,16 +50,15 @@ char	**ft_grab_envp(char **envp)
 	paths = ft_split(&envp[i][5], ':');
 	if (paths == NULL)
 		return (NULL);
-	i = 0;
-	while (paths[i])
+	i = -1;
+	while (paths[++i])
 	{
 		if (paths[i][ft_strlen(paths[i]) - 1] != '/')
 		{
 			tmp = paths[i];
 			paths[i] = ft_strjoin(paths[i], "/\0");
-			free(tmp);
+            free(tmp);
 		}
-		i++;
 	}
 	return (paths);
 }
