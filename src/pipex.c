@@ -6,42 +6,11 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/10 23:23:52 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/10 23:42:16 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/pipex.h"
-
-char	*ft_search_cmd(t_pipex *pipex, int nbcmd)
-{
-	int		i;
-	char	*path;
-	int		sux;
-
-	i = 0;
-	sux = 0;
-	while (pipex->path[i])
-	{
-		path = ft_strjoin(pipex->path[i], pipex->cmds[nbcmd - 1]);
-		if (path == NULL)
-		{
-			perror("malloc fail!\n");
-			exit(4);
-		}
-		if (access(path, X_OK) == 0)
-		{
-			sux = 1;
-			break ;
-		}
-		free(path);
-		i++;
-	}
-	if (sux == 1)
-		return (path);
-	else
-		return (NULL);
-}
-
 
 int	ft_first_child(t_pipex *pipex)
 {

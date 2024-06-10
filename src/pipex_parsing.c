@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:21:53 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/10 23:22:03 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/10 23:42:08 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,31 +40,53 @@ void	ft_validate_args(t_pipex *pipex)
 allocate the commands, args and the in-/outfile */
 void	ft_parse_cmds(t_pipex *pipex)
 {
-	int	nb_cmds;
 	int	i;
 	int	offset;
 
 	offset = 2;
-	nb_cmds = pipex->argc - 3;
+	pipex->nb_cmds = pipex->argc - 3;
 	if (pipex->mode == here_doc)
 	{
 		offset++;
-		nb_cmds--;
+		pipex->nb_cmds -= 1;
 		pipex->delimiter = ft_strdup(pipex->argv[2]);
 	}
 	else
 		pipex->infile = ft_strdup(pipex->argv[1]);
 	i = -1;
-	pipex->cmd_ret = ft_calloc(sizeof(int), nb_cmds + 2);
+	pipex->cmd_ret = ft_calloc(sizeof(int), pipex->nb_cmds + 2);
 	pipex->outfile = ft_strdup(pipex->argv[pipex->argc - 1]);
-	pipex->cmd_args = ft_calloc(sizeof(char **), nb_cmds + 1);
-	pipex->cmds = ft_calloc(sizeof(char *), nb_cmds + 1);
-	while (++i < nb_cmds)
+	pipex->cmd_args = ft_calloc(sizeof(char **), pipex->nb_cmds + 1);
+	pipex->cmds = ft_calloc(sizeof(char *), pipex->nb_cmds + 1);
+	while (++i < pipex->nb_cmds)
 	{
 		pipex->cmd_args[i] = ft_split(pipex->argv[i + offset], ' ');
 		pipex->cmds[i] = ft_strdup(pipex->cmd_args[i][0]);
 	}
-	pipex->nb_cmds = nb_cmds;
 	pipex->cmd_args[i] = NULL;
 	pipex->cmds[i] = NULL;
+}
+
+char	*ft_search_cmd(t_pipex *pipex, int nbcmd)
+{
+	int		i;
+	char	*path;
+	int		sux;
+
+	i = 0;
+	sux = 0;
+	while (pipex->path[i])
+	{
+		path = ft_strjoin(pipex->path[i], pipex->cmds[nbcmd - 1]);
+		if (path == NULL)
+		{
+			perror("malloc fail!\n");
+			exit(4);
+		}
+		if (access(path, X_OK) == 0)
+			return (path);
+		free(path);
+		i++;
+	}
+	return (NULL);
 }
