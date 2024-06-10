@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:21:53 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/10 23:42:08 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/11 01:36:21 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,35 @@ void	ft_validate_args(t_pipex *pipex)
 		pipex->mode = base_case;
 }
 
+int	ft_alloc_t_pipex(t_pipex *pipex)
+{
+	int	ret;
+
+	ret = 0;
+	pipex->cmd_ret = ft_calloc(sizeof(int), pipex->nb_cmds + 2);
+	if (pipex->cmd_ret == NULL)
+		ret = -1;
+	pipex->child_ret = ft_calloc(sizeof(int), pipex->nb_cmds - pipex->mode + 1);
+	if (pipex->child_ret == NULL)
+		ret = -1;
+	pipex->child_pids = ft_calloc(sizeof(int), pipex->nb_cmds - pipex->mode + 1);
+	if (pipex->child_pids == NULL)
+		ret = -1;
+	pipex->outfile = ft_strdup(pipex->argv[pipex->argc - 1]);
+	if (pipex->outfile == NULL)
+		ret = -1;
+	pipex->cmd_args = ft_calloc(sizeof(char **), pipex->nb_cmds + 1);
+	if (pipex->cmd_args == NULL)
+		ret = -1;
+	pipex->cmds = ft_calloc(sizeof(char *), pipex->nb_cmds + 1);
+	if (pipex->cmds == NULL)
+		ret = -1;
+	return (ret);
+	}
+
 /* Function to destinguish between cases, parse as well as
 allocate the commands, args and the in-/outfile */
-void	ft_parse_cmds(t_pipex *pipex)
+int	ft_parse_cmds(t_pipex *pipex)
 {
 	int	i;
 	int	offset;
@@ -54,10 +80,8 @@ void	ft_parse_cmds(t_pipex *pipex)
 	else
 		pipex->infile = ft_strdup(pipex->argv[1]);
 	i = -1;
-	pipex->cmd_ret = ft_calloc(sizeof(int), pipex->nb_cmds + 2);
-	pipex->outfile = ft_strdup(pipex->argv[pipex->argc - 1]);
-	pipex->cmd_args = ft_calloc(sizeof(char **), pipex->nb_cmds + 1);
-	pipex->cmds = ft_calloc(sizeof(char *), pipex->nb_cmds + 1);
+	if (ft_alloc_t_pipex(pipex) == -1)
+		return(-1);
 	while (++i < pipex->nb_cmds)
 	{
 		pipex->cmd_args[i] = ft_split(pipex->argv[i + offset], ' ');
@@ -65,6 +89,7 @@ void	ft_parse_cmds(t_pipex *pipex)
 	}
 	pipex->cmd_args[i] = NULL;
 	pipex->cmds[i] = NULL;
+	return (0);
 }
 
 char	*ft_search_cmd(t_pipex *pipex, int nbcmd)

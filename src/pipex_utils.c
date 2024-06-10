@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:19:29 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/10 23:51:47 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/11 01:35:46 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,10 @@ void	ft_cleanup(t_pipex *pipex)
 		ft_free_2d(pipex->cmds);
 	if (pipex->cmd_ret)
 		free(pipex->cmd_ret);
+	if (pipex->child_pids)
+		free(pipex->child_pids);
+	if (pipex->child_ret)
+		free(pipex->child_ret);	
 	if (pipex->path)
 		ft_free_2d(pipex->path);
 	if (pipex->cmd_args)

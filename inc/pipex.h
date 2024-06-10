@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/10 23:23:27 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/11 01:39:49 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,8 @@ typedef struct s_pipex {
 	char	**path;
 	char	**cmds;
 	int		*cmd_ret;
+	int		*child_ret;
+	int		*child_pids;
 	char	***cmd_args;
 	int		pipe[2][2];
 	int		mode;
@@ -154,7 +156,7 @@ int		ft_free_3d(char ***tofree);
 // pipex
 void	ft_init_env(t_pipex *pipex, int *argc, char **argv, char **envp);
 void	ft_validate_args(t_pipex *pipex);
-void	ft_parse_cmds(t_pipex *pipex);
+int		ft_parse_cmds(t_pipex *pipex);
 char	**ft_grab_envp(char **envp);
 t_list	*ft_pipex_lstnew(void *cont, int type);
 char	*ft_search_cmd(t_pipex *pipex, int nbcmd);
@@ -164,5 +166,6 @@ void	ft_cleanup(t_pipex *pipex);
 int		ft_child(t_pipex *pipex, int nb_cmd);
 int		ft_errhandle(t_pipex *pipex, int nb);
 void 	ft_close_all_fds(t_pipex *pipex);
+int		ft_wait_error(t_pipex *pipex);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/11 01:46:17 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/11 01:24:23 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,11 +103,12 @@ int	main(int argc, char **argv, char **envp)
 		return (32);
 	}
 	ft_validate_args(&pipex);
-	if (ft_parse_cmds(&pipex) == -1)
-	{
-		ft_cleanup(&pipex);
-		exit(ENOMEM);
-	}
+	ft_printf_err("Return value %d", ft_parse_cmds(&pipex));
+	// if (!ft_parse_cmds(&pipex))
+	// {
+	// 	ft_cleanup(&pipex);
+	// 	exit(12);
+	// }
 	pipex.path = ft_grab_envp(pipex.envp);
 	pid_m = fork();
 	if (pid_m < 0)
@@ -143,7 +144,7 @@ int	main(int argc, char **argv, char **envp)
 				ft_parent_process(&pipex);
 			else
 			{
-				// ft_wait_error(&pipex);
+				waitpid(-1, NULL, 0);
 				ft_cleanup(&pipex);
 			}
 		}
