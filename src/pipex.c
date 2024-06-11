@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/11 02:48:10 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/11 02:49:57 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,19 +125,18 @@ int	main(int argc, char **argv, char **envp)
 	}
 	else
 	{
-		i = 1;
-		while (pid_n != 0 && i < pipex.nb_cmds - 1)
+		while (pipex.child_pids[++i] != 0 && i < pipex.nb_cmds - 1)
 		{
-			pid_n = fork();
+			pipex.child_pids[i] = fork();
 			// pipex.child_pids[i - 1] = pid_n;
-			if (pid_n == 0)
+			if (pipex.child_pids[i] == 0)
 				ft_child(&pipex, i + 1);
 			if (close(pipex.pipe[(i) & 1][0])
 				|| close(pipex.pipe[(i) & 1][1]))
 				perror("pipex");
 			pipe(pipex.pipe[(i) & 1]);
-			i++;
 		}
+		i++;
 		if (pid_n != 0)
 		{
 			pid_n = fork();
