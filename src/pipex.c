@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/11 12:59:41 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/11 13:17:43 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,14 +143,15 @@ int	main(int argc, char **argv, char **envp)
 				ft_parent_process(&pipex);
 			else
 			{
+				ft_close_all_fds(&pipex);
 				// int j;
 				// j = 0;
 				// while(pipex.child_pids[j])
 				// {
-				// 	ft_printf_err("pid[i] i = %d, pid = %d", j, pipex.child_pids[j]);
+				// 	ft_printf_err("pid[i] i = %d, pid = %d\n", j, pipex.child_pids[j]);
 				// 	j++;
 				// }
-				// ft_wait_error(&pipex);
+				ft_wait_error(&pipex);
 				ft_cleanup(&pipex);
 			}
 		}

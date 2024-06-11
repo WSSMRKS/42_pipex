@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:21:53 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/11 13:03:15 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/11 13:08:50 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ int	ft_alloc_t_pipex(t_pipex *pipex)
 	pipex->cmd_ret = ft_calloc(sizeof(int), pipex->nb_cmds + 2);
 	if (pipex->cmd_ret == NULL)
 		ret = -1;
-	pipex->child_ret = ft_calloc(sizeof(int), pipex->nb_cmds - pipex->mode + 1);
+	pipex->child_ret = ft_calloc(sizeof(int), pipex->nb_cmds - pipex->mode + 2);
 	if (pipex->child_ret == NULL)
 		ret = -1;
 	pipex->child_pids = ft_calloc(sizeof(int), pipex->nb_cmds - pipex->mode + 2);
