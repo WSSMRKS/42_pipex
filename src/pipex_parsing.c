@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:21:53 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/11 01:36:21 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/11 13:03:15 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,8 @@ void	ft_validate_args(t_pipex *pipex)
 			exit(2);
 		}
 	}
-	else if (pipex->argc > 5)
-		pipex->mode = bonus_case;
 	else
-		pipex->mode = base_case;
+		pipex->mode = regular_case;
 }
 
 int	ft_alloc_t_pipex(t_pipex *pipex)
@@ -47,7 +45,7 @@ int	ft_alloc_t_pipex(t_pipex *pipex)
 	pipex->child_ret = ft_calloc(sizeof(int), pipex->nb_cmds - pipex->mode + 1);
 	if (pipex->child_ret == NULL)
 		ret = -1;
-	pipex->child_pids = ft_calloc(sizeof(int), pipex->nb_cmds - pipex->mode + 1);
+	pipex->child_pids = ft_calloc(sizeof(int), pipex->nb_cmds - pipex->mode + 2);
 	if (pipex->child_pids == NULL)
 		ret = -1;
 	pipex->outfile = ft_strdup(pipex->argv[pipex->argc - 1]);
