@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/11 02:49:57 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/11 03:58:21 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ int	ft_child(t_pipex *pipex, int nb_cmd)
 		err = 127;
 	else
 	{
-		err = execve(cmdpath, pipex->cmd_args[0], pipex->envp);
+		err = execve(cmdpath, pipex->cmd_args[nb_cmd - 1], pipex->envp);
 	}
 	ft_cleanup(pipex);
 	exit (err);
@@ -125,7 +125,7 @@ int	main(int argc, char **argv, char **envp)
 	}
 	else
 	{
-		while (pipex.child_pids[++i] != 0 && i < pipex.nb_cmds - 1)
+		while (pipex.child_pids[i++] != 0 && i < pipex.nb_cmds - 1)
 		{
 			pipex.child_pids[i] = fork();
 			// pipex.child_pids[i - 1] = pid_n;
