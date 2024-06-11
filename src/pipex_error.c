@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:52:06 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/11 13:27:24 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/11 19:35:01 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,27 +41,43 @@ int	ft_wait_error(t_pipex *pipex)
 		ft_printf_err("child ret for i = %d, %d\n", i, WEXITSTATUS(pipex->child_ret[i]));
 		if (WIFEXITED(pipex->child_ret[i]) && WEXITSTATUS(pipex->child_ret[i]) != 0)
 		{
-			if (WEXITSTATUS(pipex->child_ret[i]) == 127)
+			if (WEXITSTATUS(pipex->child_ret[i]) == 127 && i != 0)
 			{
 				ft_printf_err("%s: command not found\n", pipex->cmds[i]);
 				err = 1;
 			}
+			if (WEXITSTATUS(pipex->child_ret[i]) == 127 && i == pipex->nb_cmds - 1)
+			{
+				ft_printf_err("%s: command not found\n", pipex->cmds[i]);
+				err = 127;
+			}
 			else if (WEXITSTATUS(pipex->child_ret[i]) == 13 || WEXITSTATUS(pipex->child_ret[i]) == 2)
 			{
 				if (i == 0)
+				{
 					ft_printf_err("pipex: %s: %s\n", pipex->infile, strerror(WEXITSTATUS(pipex->child_ret[i])));
+				}
 				else
+				{
 					ft_printf_err("pipex: %s: %s\n", pipex->outfile, strerror(WEXITSTATUS(pipex->child_ret[i])));
-				err = 1;
+					err = 1;
+				}
 			}
-			else
+			else if (WEXITSTATUS(pipex->child_ret[i]) == 1 && i == 0)
+			{
+				// ft_printf_err("pipex: %s\n", strerror(WEXITSTATUS(pipex->child_ret[i])));
+				err = 0;
+			}
+			else if (WEXITSTATUS(pipex->child_ret[i]) == 1 && i != 0)
 			{
 				// ft_printf_err("pipex: %s\n", strerror(WEXITSTATUS(pipex->child_ret[i])));
 				err = 1;
 			}
+			
 		}
 		i++;
 	}
+	ft_printf_err("err is %d\n", err);
 	ft_cleanup(pipex);
 	exit(err);
 }
