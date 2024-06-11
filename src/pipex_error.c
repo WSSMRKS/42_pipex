@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:52:06 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/11 01:39:29 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/11 01:55:22 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,6 @@ int	ft_wait_error(t_pipex *pipex)
 		waitpid(pipex->child_pids[i], &(pipex->child_ret[i]), 0);
 		if (WIFEXITED(pipex->child_ret[i]) && WEXITSTATUS(pipex->child_ret[i]) != 0)
 		{
-			// ft_printf_err("exited, status=%d\n, for child nr %d\n with pid %d\n", WEXITSTATUS(pipex->child_ret[i]), i, pipex->child_pids[i]);
-			ft_printf_err("Actual value of pipex->child_ret[i]: {%d} for i nbr {%d}\nError code: %d, strerror: %s\n", pipex->child_ret[i], i, WEXITSTATUS(pipex->child_ret[i]), strerror(WEXITSTATUS(pipex->child_ret[i])));
-			// ft_printf_err("exited, status=%d\n, for child nr %d\n", WEXITSTATUS(pipex->child_ret[i]), i);
 			if (WEXITSTATUS(pipex->child_ret[i]) == 127)
 				ft_printf_err("%s: command not found\n", pipex->cmds[i]);
 			else if (WEXITSTATUS(pipex->child_ret[i]) == 13 || WEXITSTATUS(pipex->child_ret[i]) == 2)

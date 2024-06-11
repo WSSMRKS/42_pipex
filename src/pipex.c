@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/11 01:46:17 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/11 02:06:00 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,12 +90,13 @@ int	ft_parent_process(t_pipex *pipex)
 */
 int	main(int argc, char **argv, char **envp)
 {
-	int		pid_m;
+	// int		pid_m;
 	int		pid_n;
 	t_pipex	pipex;
 	int		i;
 
 	pid_n = -5;
+	i = 0;
 	ft_init_env(&pipex, &argc, argv, envp);
 	if (pipe(pipex.pipe[0]) == -1 || pipe(pipex.pipe[1]) == -1)
 	{
@@ -109,13 +110,13 @@ int	main(int argc, char **argv, char **envp)
 		exit(ENOMEM);
 	}
 	pipex.path = ft_grab_envp(pipex.envp);
-	pid_m = fork();
-	if (pid_m < 0)
+	pipex.child_pids[i] = fork();
+	if (pipex.child_pids[i] < 0)
 	{
 		strerror(10);
 		return (10);
 	}
-	else if (pid_m == 0)
+	else if (pipex.child_pids[i] == 0)
 	{
 		// if (pipex.mode == here_doc)
 		// 	ft_here_doc(&pipex);
@@ -128,6 +129,7 @@ int	main(int argc, char **argv, char **envp)
 		while (pid_n != 0 && i < pipex.nb_cmds)
 		{
 			pid_n = fork();
+			// pipex.child_pids[i - 1] = pid_n;
 			if (pid_n == 0)
 				ft_child(&pipex, i);
 			if (close(pipex.pipe[(i - 1) & 1][0])
@@ -139,10 +141,18 @@ int	main(int argc, char **argv, char **envp)
 		if (pid_n != 0)
 		{
 			pid_n = fork();
+			// pipex.child_pids[i - 1] = pid_n;
 			if (pid_n == 0)
 				ft_parent_process(&pipex);
 			else
 			{
+				// int j;
+				// j = 0;
+				// while(pipex.child_pids[j])
+				// {
+				// 	ft_printf_err("pid[i] i = %d, pid = %d", j, pipex.child_pids[j]);
+				// 	j++;
+				// }
 				// ft_wait_error(&pipex);
 				ft_cleanup(&pipex);
 			}
