@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   pipex_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
+/*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:19:29 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/11 01:35:46 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/12 11:38:33 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/pipex.h"
 
-void    ft_close_all_fds(t_pipex *pipex)
+void	ft_close_all_fds(t_pipex *pipex)
 {
 	if (close(pipex->pipe[0][0]) || close(pipex->pipe[0][1])
 		|| close(pipex->pipe[1][0]) || close(pipex->pipe[1][1]))
@@ -57,7 +57,7 @@ char	**ft_grab_envp(char **envp)
 		{
 			tmp = paths[i];
 			paths[i] = ft_strjoin(paths[i], "/\0");
-            free(tmp);
+			free(tmp);
 		}
 	}
 	return (paths);
@@ -78,7 +78,7 @@ void	ft_cleanup(t_pipex *pipex)
 	if (pipex->child_pids)
 		free(pipex->child_pids);
 	if (pipex->child_ret)
-		free(pipex->child_ret);	
+		free(pipex->child_ret);
 	if (pipex->path)
 		ft_free_2d(pipex->path);
 	if (pipex->cmd_args)

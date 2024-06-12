@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex_error.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
+/*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:52:06 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/12 01:58:29 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/12 12:42:40 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ int	ft_wait_error(t_pipex *pipex)
 		{
 			if (WEXITSTATUS(pipex->child_ret[i]) == 127 && i != 0)
 			{
-				ft_printf_err("q: command not found\n", pipex->cmds[i]);
+				ft_printf_err("%s: command not found\n", pipex->cmds[i]);
 				err = 1;
 			}
 			if (WEXITSTATUS(pipex->child_ret[i]) == 127
