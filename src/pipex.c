@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/11 19:51:31 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/12 02:13:22 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,13 +84,18 @@ int	ft_parent_process(t_pipex *pipex)
 	exit(err);
 }
 
+int	ft_here_doc(t_pipex *pipex)
+{
+	pipex->delimiter = pipex->delimiter;
+	return (0);
+}
+
 /* 	main function of project pipex.
 	Input syntax: ./pipex infile cmd1 ... cmdn outfile
 	alternative: ./pipex here_doc LIMITER cmd1 cmd2 outfile
 */
 int	main(int argc, char **argv, char **envp)
 {
-	// int		pid_m;
 	int		pid_n;
 	t_pipex	pipex;
 	int		i;
@@ -118,10 +123,10 @@ int	main(int argc, char **argv, char **envp)
 	}
 	else if (pipex.child_pids[i] == 0)
 	{
-		// if (pipex.mode == here_doc)
-		// 	ft_here_doc(&pipex);
-		// else
-		ft_first_child(&pipex);
+		if (pipex.mode == here_doc)
+			ft_here_doc(&pipex);
+		else
+			ft_first_child(&pipex);
 	}
 	else
 	{
@@ -144,13 +149,6 @@ int	main(int argc, char **argv, char **envp)
 			else
 			{
 				ft_close_all_fds(&pipex);
-				// int j;
-				// j = 0;
-				// while(pipex.child_pids[j])
-				// {
-				// 	ft_printf_err("pid[i] i = %d, pid = %d\n", j, pipex.child_pids[j]);
-				// 	j++;
-				// }
 				ft_wait_error(&pipex);
 				ft_cleanup(&pipex);
 			}
