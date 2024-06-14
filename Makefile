@@ -8,7 +8,7 @@ NAME = pipex
 COMPILE_OPTIONS =  -g -Werror -Wall -Wextra -L./libft -lft 
 # Detail on lft means including if libft was called blalibft the command would be -lblalibft it is searching for '.a' and '.so' files
 TESTFLAGS = -g3
-COMPILE_FLAGS = -g3 -I./inc -Werror -Wall -Wextra -O0 -c
+COMPILE_FLAGS = -g3 -I./inc -I./libft -Werror -Wall -Wextra -O0 -c
 # ADD SEARCHFLAGS FOR LIBFT ,...
 # Compiler #
 CC = cc

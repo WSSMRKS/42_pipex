@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/pipex.h"
+#include <pipex.h>
 
 int	ft_here_doc_inp(t_pipex *pipex)
 {

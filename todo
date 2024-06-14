@@ -3,7 +3,7 @@
 [x] propper Error handling
 [ ] Make submodules stable
 [ ] Move code to branch main
-[ ] Norminette
+[x] Norminette
 [x] Split functions to files
 [x] Makefile
 [x] Forbidden functions

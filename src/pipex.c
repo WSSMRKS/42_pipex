@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/pipex.h"
+#include <pipex.h>
 
 /* 	main function of project pipex.
 	Input syntax: ./pipex infile cmd1 ... cmdn outfile

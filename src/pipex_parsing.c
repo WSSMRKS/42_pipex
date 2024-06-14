@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/pipex.h"
+#include <pipex.h>
 
 /* Function checks minimum number of arguments and if here_doc flag is set.*/
 void	ft_validate_args(t_pipex *pipex)

@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/pipex.h"
+#include <pipex.h>
 
 void	ft_close_all_fds(t_pipex *pipex)
 {

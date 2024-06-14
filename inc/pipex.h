@@ -6,14 +6,14 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 20:34:13 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 21:00:00 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PIPEX_H
 # define PIPEX_H
 
-# include "../libft/libft.h"
+# include <libft.h>
 # include <stdio.h>
 # include <sys/wait.h>
 # include <sys/types.h>

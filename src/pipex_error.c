@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/pipex.h"
+#include <pipex.h>
 
 /* Function to handle the different exitstatus of pipex for err 127*/
 void	ft_errno_127(t_pipex *pipex, int i, int *err)
