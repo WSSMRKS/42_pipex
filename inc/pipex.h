@@ -6,14 +6,13 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 19:31:16 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 20:34:13 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PIPEX_H
 # define PIPEX_H
 
-//current project
 # include "../libft/libft.h"
 # include <stdio.h>
 # include <sys/wait.h>
@@ -24,13 +23,6 @@
 # include <errno.h>
 # define TEMP_FILE "./.pipex_temp"
 
-//libft
-# ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 100
-# endif
-# ifndef MAX_FD
-#  define MAX_FD 1048
-# endif
 //current project
 // # define USAGE "[infile | here_doc LIMITER] cmd1 cmd2 ... cmdn outfile"
 // # define NO_CMD "command not found"
@@ -93,6 +85,13 @@ void	ft_init_env(t_pipex *pipex, int *argc, char **argv, char **envp);
 char	**ft_grab_envp(char **envp);
 void	ft_cleanup_exit(t_pipex *pipex, int ex);
 void	ft_pipex_init(t_pipex *pipex);
+
+// pipex_children.c
+void	ft_fork_first_child(t_pipex *pipex, int *i);
+void	ft_first_child(t_pipex *pipex);
+void	ft_malcolm(t_pipex *pipex, int *i);
+void	ft_child(t_pipex *pipex, int nb_cmd);
+void	ft_parent_process(t_pipex *pipex);
 
 // pipex_error.c
 void	ft_wait_error(t_pipex *pipex);

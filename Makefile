@@ -5,14 +5,15 @@ LIBFTDIR = libft/
 # Names #
 NAME = pipex
 # Compiler & Compilation Flags #
-COMPILE_OPTIONS =  -g -Werror -Wall -Wextra
+COMPILE_OPTIONS =  -g -Werror -Wall -Wextra -L./libft -lft 
+# Detail on lft means including if libft was called blalibft the command would be -lblalibft it is searching for '.a' and '.so' files
 TESTFLAGS = -g3
-COMPILE_FLAGS = -g3 -Werror -Wall -Wextra -O0 -c
+COMPILE_FLAGS = -g3 -I./inc -Werror -Wall -Wextra -O0 -c
 # ADD SEARCHFLAGS FOR LIBFT ,...
 # Compiler #
 CC = cc
 # Source Files #
-SRC = $(SRCDIR)pipex.c $(SRCDIR)pipex_parsing.c $(SRCDIR)pipex_utils.c $(SRCDIR)pipex_error.c $(SRCDIR)pipex_here_doc.c
+SRC = $(SRCDIR)pipex.c $(SRCDIR)pipex_parsing.c $(SRCDIR)pipex_utils.c $(SRCDIR)pipex_children.c $(SRCDIR)pipex_error.c $(SRCDIR)pipex_here_doc.c
 HEADERS = $(HDRDIR)pipex.h
 LIBFT_SRC = $(LIBFTDIR)libft.a
 # Object Files
@@ -23,7 +24,7 @@ BONUS_OBJ = $(BONUS_SRC:.c=.o)
 all: $(NAME)	# Compile the entire project including bonus.
 
 $(NAME): $(LIBFT_SRC) $(SRC_OBJ) # Compile mandatory part.
-	$(CC) $(SRC_OBJ) $(LIBFT_SRC) $(COMPILE_OPTIONS) -o $(NAME)
+	$(CC) $(COMPILE_OPTIONS) $(SRC_OBJ) $(LIBFT_SRC) -o $(NAME)
 
 $(LIBFT_SRC): # Compile libft
 	$(MAKE) all -C $(LIBFTDIR)
@@ -32,7 +33,7 @@ exes: $(NAME) clean # Compile all project parts including bonus clean up after c
 
 # Compile .c to .o #
 %.o: %.c
-	$(CC) $^ $(COMPILE_FLAGS) -o $@
+	$(CC) $(COMPILE_FLAGS) $^ -o $@
 
 # Checkers, Testers #
 

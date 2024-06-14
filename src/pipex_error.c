@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:52:06 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 19:30:33 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 19:43:40 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void	ft_errno_127(t_pipex *pipex, int i, int *err)
 void	ft_errno_1_2_13(t_pipex *pipex, int i, int *err)
 {
 	char	*filename;
-	
+
 	if (WEXITSTATUS(pipex->child_ret[i]) == 13
 		|| WEXITSTATUS(pipex->child_ret[i]) == 2)
 	{
