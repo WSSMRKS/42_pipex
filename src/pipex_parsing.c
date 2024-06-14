@@ -6,12 +6,13 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:21:53 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 15:57:44 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 18:15:27 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/pipex.h"
 
+/* Function checks minimum number of arguments and if here_doc flag is set.*/
 void	ft_validate_args(t_pipex *pipex)
 {
 	if (pipex->argc < 5)
@@ -34,6 +35,7 @@ void	ft_validate_args(t_pipex *pipex)
 		pipex->mode = regular_case;
 }
 
+/* Function allocates memory for the dynamic elements of the t_pipex struct*/
 int	ft_alloc_t_pipex(t_pipex *pipex)
 {
 	int	ret;
@@ -61,6 +63,29 @@ int	ft_alloc_t_pipex(t_pipex *pipex)
 	return (ret);
 }
 
+/* Preparing the environment for the actual passing of the argument.
+(due to too many function lines in ft_parse_cmds)*/
+int	ft_set_parse_env(t_pipex *pipex, int *offset)
+{
+	*offset = 2;
+	pipex->nb_cmds = pipex->argc - 3;
+	if (pipex->mode == here_doc)
+	{
+		*offset += 1;
+		pipex->nb_cmds -= 1;
+		pipex->delimiter = ft_strdup(pipex->argv[2]);
+		if (!pipex->delimiter)
+			return (-1);
+	}
+	else
+	{
+		pipex->infile = ft_strdup(pipex->argv[1]);
+		if (!pipex->infile)
+			return (-1);
+	}
+	return (0);
+}
+
 /* Function to destinguish between cases, parse as well as
 allocate the commands, args and the in-/outfile */
 int	ft_parse_cmds(t_pipex *pipex)
@@ -68,30 +93,22 @@ int	ft_parse_cmds(t_pipex *pipex)
 	int	i;
 	int	offset;
 
-	offset = 2;
-	pipex->nb_cmds = pipex->argc - 3;
-	if (pipex->mode == here_doc)
+	if (ft_set_parse_env(pipex, &offset) || ft_alloc_t_pipex(pipex))
 	{
-		offset++;
-		pipex->nb_cmds -= 1;
-		pipex->delimiter = ft_strdup(pipex->argv[2]);
+		ft_cleanup(pipex);
+		exit (ENOMEM);
 	}
-	else
-		pipex->infile = ft_strdup(pipex->argv[1]);
 	i = -1;
-	if (ft_alloc_t_pipex(pipex) == -1 || (!pipex->infile && pipex->mode != 2)
-		|| (pipex->mode == here_doc && pipex->delimiter == NULL))
-		return (313);
 	while (++i < pipex->nb_cmds)
 	{
 		pipex->cmd_args[i] = ft_split(pipex->argv[i + offset], ' ');
 		if (pipex->cmd_args[i] == NULL || pipex->cmd_args[i][0] == NULL)
-			return (313);
+			return (ENOMEM);
 		else
 		{
 			pipex->cmds[i] = ft_strdup(pipex->cmd_args[i][0]);
 			if (!pipex->cmds[i])
-				return (313);
+				return (ENOMEM);
 		}
 	}
 	pipex->cmd_args[i] = NULL;
@@ -99,6 +116,8 @@ int	ft_parse_cmds(t_pipex *pipex)
 	return (0);
 }
 
+/* Function checks if the command built from the environmental variable 
+and the pipex argument is valid by using the access function*/
 char	*ft_search_cmd(t_pipex *pipex, int nbcmd)
 {
 	int		i;
@@ -111,7 +130,8 @@ char	*ft_search_cmd(t_pipex *pipex, int nbcmd)
 		if (path == NULL)
 		{
 			perror("malloc fail!\n");
-			exit(4);
+			ft_cleanup(pipex);
+			exit(ENOMEM);
 		}
 		if (access(path, X_OK) == 0)
 			return (path);

@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:19:29 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/12 11:38:33 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 19:10:44 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,25 @@ void	ft_init_env(t_pipex *pipex, int *argc, char **argv, char **envp)
 	pipex->outfile = NULL;
 	pipex->nb_cmds = 0;
 }
+
+void	ft_pipex_init(t_pipex *pipex)
+{
+	if (pipe(pipex->pipe[0]) == -1 || pipe(pipex->pipe[1]) == -1)
+	{
+		strerror(32);
+		exit (32);
+	}
+	ft_validate_args(pipex);
+	if (ft_parse_cmds(pipex) == -1)
+	{
+		ft_cleanup(pipex);
+		exit(1);
+	}
+	pipex->path = ft_grab_envp(pipex->envp);
+	if (pipex->mode == here_doc)
+		ft_here_doc_inp(pipex);
+}
+
 
 char	**ft_grab_envp(char **envp)
 {
@@ -83,4 +102,10 @@ void	ft_cleanup(t_pipex *pipex)
 		ft_free_2d(pipex->path);
 	if (pipex->cmd_args)
 		ft_free_3d(pipex->cmd_args);
+	if (pipex->mode == here_doc)
+	{
+		unlink(TEMP_FILE);
+		if (!access(TEMP_FILE, F_OK))
+			ft_printf_err("pipex: could not delete tempfile\n");
+	}
 }

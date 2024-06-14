@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 15:57:10 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 19:15:13 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,7 @@ int	ft_child(t_pipex *pipex, int nb_cmd)
 	if (cmdpath == NULL)
 		err = 127;
 	else
-	{
 		err = execve(cmdpath, pipex->cmd_args[nb_cmd - 1], pipex->envp);
-	}
 	ft_cleanup(pipex);
 	exit(err);
 }
@@ -71,11 +69,8 @@ int	ft_parent_process(t_pipex *pipex)
 		ft_cleanup(pipex);
 		exit(errno);
 	}
-	else
-	{
-		dup2(fdout, STDOUT_FILENO);
-		close(fdout);
-	}
+	dup2(fdout, STDOUT_FILENO);
+	close(fdout);
 	dup2(pipex->pipe[(pipex->nb_cmds -1) & 1][0], STDIN_FILENO);
 	ft_close_all_fds(pipex);
 	cmdpath = ft_search_cmd(pipex, pipex->nb_cmds);
@@ -93,27 +88,13 @@ int	ft_parent_process(t_pipex *pipex)
 */
 int	main(int argc, char **argv, char **envp)
 {
-	int		pid_n;
 	t_pipex	pipex;
+	int		pid_n;
 	int		i;
 
-	pid_n = -5;
-	i = 0;
 	ft_init_env(&pipex, &argc, argv, envp);
-	if (pipe(pipex.pipe[0]) == -1 || pipe(pipex.pipe[1]) == -1)
-	{
-		strerror(32);
-		return (32);
-	}
-	ft_validate_args(&pipex);
-	if (ft_parse_cmds(&pipex) == -1)
-	{
-		ft_cleanup(&pipex);
-		exit(1);
-	}
-	pipex.path = ft_grab_envp(pipex.envp);
-	if (pipex.mode == here_doc)
-		ft_here_doc_inp(&pipex);
+	ft_pipex_init(&pipex);
+	i = 0;
 	pipex.child_pids[i] = fork();
 	if (pipex.child_pids[i] < 0)
 	{
@@ -129,6 +110,7 @@ int	main(int argc, char **argv, char **envp)
 	}
 	else
 	{
+		pid_n = -5;
 		while (pipex.child_pids[i++] != 0 && i < pipex.nb_cmds - 1)
 		{
 			pipex.child_pids[i] = fork();

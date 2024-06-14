@@ -6,23 +6,47 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:52:06 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 16:06:48 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 19:11:30 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/pipex.h"
 
-int	ft_errhandle(t_pipex *pipex, int nb)
+/* Function to handle the different exitstatus of pipex for err 127*/
+void	ft_errno_127(t_pipex *pipex, int i, int *err)
 {
-	if (pipex->cmd_ret[nb] == 13)
-		ft_printf_err("pipex: %s: Permission denied\n", pipex->infile);
-	if (pipex->cmd_ret[nb] == 2)
-		ft_printf_err("pipex: %s: No such file or directory\n", pipex->infile);
-	if (pipex->cmd_ret[nb] == 127)
-		ft_printf_err("%s: command not found\n", pipex->cmds[nb - 1]);
-	if (pipex->cmd_ret[nb] == 4)
-		ft_printf_err("pipex: %s: execve error\n", pipex->cmds[nb - 1]);
-	return (1);
+	if (WEXITSTATUS(pipex->child_ret[i]) == 127)
+	{
+		ft_printf_err("%s: command not found\n", pipex->cmds[i]);
+		if (i != 0)
+			*err = 1;
+		if (i == pipex->nb_cmds - 1)
+			*err = 127;
+	}
+}
+
+/* Function to handle the different exitstatus of pipex for err 1, 2, 13*/
+void	ft_errno_1_2_13(t_pipex *pipex, int i, int *err)
+{
+	char	*filename;
+	
+	if (WEXITSTATUS(pipex->child_ret[i]) == 13
+		|| WEXITSTATUS(pipex->child_ret[i]) == 2)
+	{
+		if (i == 0)
+			filename = pipex->infile;
+		else
+		{
+			filename = pipex->outfile;
+			*err = 1;
+		}
+		ft_printf_err("pipex: %s: %s\n", filename,
+			strerror(WEXITSTATUS(pipex->child_ret[i])));
+	}
+	else if (WEXITSTATUS(pipex->child_ret[i]) == 1 && i == 0)
+		*err = 0;
+	else if (WEXITSTATUS(pipex->child_ret[i]) == 1 && i != 0)
+		*err = 1;
 }
 
 int	ft_wait_error(t_pipex *pipex)
@@ -38,36 +62,8 @@ int	ft_wait_error(t_pipex *pipex)
 		waitpid(pipex->child_pids[i], &(pipex->child_ret[i]), 0);
 		if (WIFEXITED(pipex->child_ret[i]))
 		{
-			if (WEXITSTATUS(pipex->child_ret[i]) == 127 && i != 0)
-			{
-				ft_printf_err("%s: command not found\n", pipex->cmds[i]);
-				err = 1;
-			}
-			if (WEXITSTATUS(pipex->child_ret[i]) == 127
-				&& i == pipex->nb_cmds - 1)
-			{
-				ft_printf_err("%s: command not found\n", pipex->cmds[i]);
-				err = 127;
-			}
-			else if (WEXITSTATUS(pipex->child_ret[i]) == 13
-				|| WEXITSTATUS(pipex->child_ret[i]) == 2)
-			{
-				if (i == 0)
-				{
-					ft_printf_err("pipex: %s: %s\n", pipex->infile,
-						strerror(WEXITSTATUS(pipex->child_ret[i])));
-				}
-				else
-				{
-					ft_printf_err("pipex: %s: %s\n", pipex->outfile,
-						strerror(WEXITSTATUS(pipex->child_ret[i])));
-					err = 1;
-				}
-			}
-			else if (WEXITSTATUS(pipex->child_ret[i]) == 1 && i == 0)
-				err = 0;
-			else if (WEXITSTATUS(pipex->child_ret[i]) == 1 && i != 0)
-				err = 1;
+			ft_errno_127(pipex, i, &err);
+			ft_errno_1_2_13(pipex, i, &err);
 		}
 		i++;
 	}

@@ -5,5 +5,5 @@
 [ ] Move code to branch main
 [ ] Norminette
 [x] Split functions to files
-[ ] Makefile
+[x] Makefile
 [x] Forbidden functions
