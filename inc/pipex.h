@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 10:03:45 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 18:53:28 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 19:31:16 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,23 +83,23 @@ typedef struct s_pipex
 }				t_pipex;
 
 // pipex.c
-int		ft_first_child(t_pipex *pipex);
-int		ft_child(t_pipex *pipex, int nb_cmd);
-int		ft_parent_process(t_pipex *pipex);
+void	ft_first_child(t_pipex *pipex);
+void	ft_child(t_pipex *pipex, int nb_cmd);
+void	ft_parent_process(t_pipex *pipex);
 
 // pipex_utils.c
 void	ft_close_all_fds(t_pipex *pipex);
 void	ft_init_env(t_pipex *pipex, int *argc, char **argv, char **envp);
 char	**ft_grab_envp(char **envp);
-void	ft_cleanup(t_pipex *pipex);
+void	ft_cleanup_exit(t_pipex *pipex, int ex);
 void	ft_pipex_init(t_pipex *pipex);
 
 // pipex_error.c
-int		ft_wait_error(t_pipex *pipex);
+void	ft_wait_error(t_pipex *pipex);
 
 // pipex_here_doc.c
 int		ft_here_doc_inp(t_pipex *pipex);
-int		ft_here_doc(t_pipex *pipex);
+void	ft_here_doc(t_pipex *pipex);
 
 // pipex_parsing.c
 void	ft_validate_args(t_pipex *pipex);

@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 15:54:59 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 15:56:49 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 19:31:02 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,7 @@ int	ft_here_doc_inp(t_pipex *pipex)
 	if (fdin < 0)
 	{
 		ft_printf_err("Failed to open temporary file: %s\n", strerror(errno));
-		ft_cleanup(pipex);
-		exit(errno);
+		ft_cleanup_exit(pipex, errno);
 	}
 	buff = ft_get_next_line(0);
 	while (buff != NULL
@@ -39,7 +38,7 @@ int	ft_here_doc_inp(t_pipex *pipex)
 	return (0);
 }
 
-int	ft_here_doc(t_pipex *pipex)
+void	ft_here_doc(t_pipex *pipex)
 {
 	int		fdin;
 	char	*cmdpath;
@@ -49,8 +48,7 @@ int	ft_here_doc(t_pipex *pipex)
 	if (fdin < 0)
 	{
 		ft_printf_err("Failed to reopen .pipex_temp: %s\n", strerror(errno));
-		ft_cleanup(pipex);
-		exit(errno);
+		ft_cleanup_exit(pipex, errno);
 	}
 	dup2(fdin, STDIN_FILENO);
 	dup2(pipex->pipe[1][1], STDOUT_FILENO);
@@ -64,6 +62,5 @@ int	ft_here_doc(t_pipex *pipex)
 		err = execve(cmdpath, pipex->cmd_args[0], pipex->envp);
 		ft_printf_err("Command executed with error: %d\n", err);
 	}
-	ft_cleanup(pipex);
-	exit(err);
+	ft_cleanup_exit(pipex, err);
 }

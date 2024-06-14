@@ -6,13 +6,13 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 19:15:13 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 19:30:19 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/pipex.h"
 
-int	ft_first_child(t_pipex *pipex)
+void	ft_first_child(t_pipex *pipex)
 {
 	int		fdin;
 	char	*cmdpath;
@@ -20,10 +20,7 @@ int	ft_first_child(t_pipex *pipex)
 
 	fdin = open(pipex->infile, O_RDONLY);
 	if (fdin < 0)
-	{
-		ft_cleanup(pipex);
-		exit(errno);
-	}
+		ft_cleanup_exit(pipex, errno);
 	dup2(fdin, STDIN_FILENO);
 	dup2(pipex->pipe[1][1], STDOUT_FILENO);
 	close(fdin);
@@ -33,11 +30,10 @@ int	ft_first_child(t_pipex *pipex)
 		err = 127;
 	else
 		err = execve(cmdpath, pipex->cmd_args[0], pipex->envp);
-	ft_cleanup(pipex);
-	exit(err);
+	ft_cleanup_exit(pipex, err);
 }
 
-int	ft_child(t_pipex *pipex, int nb_cmd)
+void	ft_child(t_pipex *pipex, int nb_cmd)
 {
 	char	*cmdpath;
 	int		err;
@@ -50,11 +46,10 @@ int	ft_child(t_pipex *pipex, int nb_cmd)
 		err = 127;
 	else
 		err = execve(cmdpath, pipex->cmd_args[nb_cmd - 1], pipex->envp);
-	ft_cleanup(pipex);
-	exit(err);
+	ft_cleanup_exit(pipex, err);
 }
 
-int	ft_parent_process(t_pipex *pipex)
+void	ft_parent_process(t_pipex *pipex)
 {
 	char	*cmdpath;
 	int		fdout;
@@ -65,10 +60,7 @@ int	ft_parent_process(t_pipex *pipex)
 	else
 		fdout = open(pipex->outfile, O_CREAT | O_RDWR | O_TRUNC, 0644);
 	if (fdout < 0)
-	{
-		ft_cleanup(pipex);
-		exit(errno);
-	}
+		ft_cleanup_exit(pipex, errno);
 	dup2(fdout, STDOUT_FILENO);
 	close(fdout);
 	dup2(pipex->pipe[(pipex->nb_cmds -1) & 1][0], STDIN_FILENO);
@@ -78,8 +70,7 @@ int	ft_parent_process(t_pipex *pipex)
 		err = 127;
 	else
 		err = execve(cmdpath, pipex->cmd_args[pipex->nb_cmds - 1], pipex->envp);
-	ft_cleanup(pipex);
-	exit(err);
+	ft_cleanup_exit(pipex, err);
 }
 
 /* 	main function of project pipex.
@@ -98,16 +89,13 @@ int	main(int argc, char **argv, char **envp)
 	pipex.child_pids[i] = fork();
 	if (pipex.child_pids[i] < 0)
 	{
-		strerror(10);
-		return (10);
+		strerror(EPIPE);
+		ft_cleanup_exit(&pipex, EPIPE);
 	}
+	if (pipex.mode == here_doc && pipex.child_pids[i] == 0)
+		ft_here_doc(&pipex);
 	else if (pipex.child_pids[i] == 0)
-	{
-		if (pipex.mode == here_doc)
-			ft_here_doc(&pipex);
-		else
-			ft_first_child(&pipex);
-	}
+		ft_first_child(&pipex);
 	else
 	{
 		pid_n = -5;

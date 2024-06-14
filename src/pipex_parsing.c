@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:21:53 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 18:15:27 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 19:24:23 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,10 +94,7 @@ int	ft_parse_cmds(t_pipex *pipex)
 	int	offset;
 
 	if (ft_set_parse_env(pipex, &offset) || ft_alloc_t_pipex(pipex))
-	{
-		ft_cleanup(pipex);
-		exit (ENOMEM);
-	}
+		ft_cleanup_exit(pipex, ENOMEM);
 	i = -1;
 	while (++i < pipex->nb_cmds)
 	{
@@ -130,8 +127,7 @@ char	*ft_search_cmd(t_pipex *pipex, int nbcmd)
 		if (path == NULL)
 		{
 			perror("malloc fail!\n");
-			ft_cleanup(pipex);
-			exit(ENOMEM);
+			ft_cleanup_exit(pipex, ENOMEM);
 		}
 		if (access(path, X_OK) == 0)
 			return (path);

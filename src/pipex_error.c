@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:52:06 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 19:11:30 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 19:30:33 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ void	ft_errno_1_2_13(t_pipex *pipex, int i, int *err)
 		*err = 1;
 }
 
-int	ft_wait_error(t_pipex *pipex)
+void	ft_wait_error(t_pipex *pipex)
 {
 	int	i;
 	int	err;
@@ -67,6 +67,5 @@ int	ft_wait_error(t_pipex *pipex)
 		}
 		i++;
 	}
-	ft_cleanup(pipex);
-	exit(err);
+	ft_cleanup_exit(pipex, err);
 }

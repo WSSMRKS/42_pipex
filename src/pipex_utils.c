@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:19:29 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 19:10:44 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 19:24:42 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,10 +43,7 @@ void	ft_pipex_init(t_pipex *pipex)
 	}
 	ft_validate_args(pipex);
 	if (ft_parse_cmds(pipex) == -1)
-	{
-		ft_cleanup(pipex);
-		exit(1);
-	}
+		ft_cleanup_exit(pipex, 1);
 	pipex->path = ft_grab_envp(pipex->envp);
 	if (pipex->mode == here_doc)
 		ft_here_doc_inp(pipex);
@@ -82,7 +79,7 @@ char	**ft_grab_envp(char **envp)
 	return (paths);
 }
 
-void	ft_cleanup(t_pipex *pipex)
+void	ft_cleanup_exit(t_pipex *pipex, int ex)
 {
 	if (pipex->delimiter)
 		free(pipex->delimiter);
@@ -108,4 +105,6 @@ void	ft_cleanup(t_pipex *pipex)
 		if (!access(TEMP_FILE, F_OK))
 			ft_printf_err("pipex: could not delete tempfile\n");
 	}
+	if (ex > -4)
+		exit(ex);
 }
