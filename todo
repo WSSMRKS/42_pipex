@@ -2,7 +2,7 @@
 [x] handle here_doc ??
 [x] propper Error handling
 [ ] Make submodules stable
-[ ] Move code to branch main
+[x] Move code to branch main
 [x] Norminette
 [x] Split functions to files
 [x] Makefile
