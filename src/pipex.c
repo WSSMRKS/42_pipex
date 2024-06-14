@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/12 13:25:13 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 15:24:56 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,10 @@ int	ft_parent_process(t_pipex *pipex)
 	int		fdout;
 	int		err;
 
-	fdout = open(pipex->outfile, O_CREAT | O_RDWR | O_TRUNC, 0644);
+	if (pipex->mode == here_doc)
+		fdout = open(pipex->outfile, O_CREAT | O_APPEND | O_WRONLY, 0644);
+	else
+		fdout = open(pipex->outfile, O_CREAT | O_RDWR | O_TRUNC, 0644);
 	if (fdout < 0)
 	{
 		ft_cleanup(pipex);
@@ -90,7 +93,7 @@ int	ft_here_doc_inp(t_pipex *pipex)
 	char	*buff;
 
 	ft_printf_err("Starting here_doc\n");
-	fdin = open(TEMP_FILE, O_CREAT | O_TRUNC, 0644);
+	fdin = open(TEMP_FILE, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (fdin < 0)
 	{
 		ft_printf_err("Failed to open temporary file: %s\n", strerror(errno));
@@ -105,6 +108,7 @@ int	ft_here_doc_inp(t_pipex *pipex)
 	{
 		ft_printf_err("Entering the reading loop\n");
 		ft_fprintf(fdin, "%s", buff);
+		ft_fprintf(2, "%s", buff);
 		free(buff);
 		ft_printf_err("Reading next line\n");
 		buff = ft_get_next_line(0);
@@ -175,6 +179,7 @@ int	main(int argc, char **argv, char **envp)
 	pipex.path = ft_grab_envp(pipex.envp);
 	if (pipex.mode == here_doc)
 		ft_here_doc_inp(&pipex);
+	ft_fprintf(2, "attempting to fork\n");
 	pipex.child_pids[i] = fork();
 	if (pipex.child_pids[i] < 0)
 	{
@@ -184,6 +189,7 @@ int	main(int argc, char **argv, char **envp)
 	else if (pipex.child_pids[i] == 0)
 	{
 		if (pipex.mode == here_doc)
+			// pipex.infile = TEMP_FILE;
 			ft_here_doc(&pipex);
 		else
 			ft_first_child(&pipex);
@@ -211,7 +217,7 @@ int	main(int argc, char **argv, char **envp)
 				ft_close_all_fds(&pipex);
 				if (pipex.mode == here_doc)
 				{
-					unlink(TEMP_FILE);
+					// unlink(TEMP_FILE);
 					if (!access(TEMP_FILE, F_OK))
 						ft_printf_err("pipex: could not delete tempfile\n");
 				}
