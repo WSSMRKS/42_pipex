@@ -1,5 +1,5 @@
 [x] Series Testing
-[ ] handle here_doc ??
+[x] handle here_doc ??
 [x] propper Error handling
 [ ] Make submodules stable
 [ ] Move code to branch main
