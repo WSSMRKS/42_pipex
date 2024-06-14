@@ -1,46 +1,38 @@
-# solve relink issues
-
-
-
-
 # Directories #
 SRCDIR = src/
 HDRDIR = inc/
-LIBFTDIR = libft
+LIBFTDIR = libft/
 # Names #
 NAME = pipex
-# no bonus
-BONUS_NAME = pipex_bonus
-# Compiler & COptions & CFlags #
-CFLAGS =  -g -Werror -Wall -Wextra
+# Compiler & Compilation Flags #
+COMPILE_OPTIONS =  -g -Werror -Wall -Wextra
 TESTFLAGS = -g3
-COPTIONS = -g3 -Werror -Wall -Wextra -O0 -c
+COMPILE_FLAGS = -g3 -Werror -Wall -Wextra -O0 -c
 # ADD SEARCHFLAGS FOR LIBFT ,...
+# Compiler #
 CC = cc
 # Source Files #
-SRC = src/pipex.c src/pipex_parsing.c src/pipex_utils.c src/pipex_error.c src/pipex_here_doc.c
-HEADERS = pipex.h
-LIBFT_SRC = libft/libft.a
+SRC = $(SRCDIR)pipex.c $(SRCDIR)pipex_parsing.c $(SRCDIR)pipex_utils.c $(SRCDIR)pipex_error.c $(SRCDIR)pipex_here_doc.c
+HEADERS = $(HDRDIR)pipex.h
+LIBFT_SRC = $(LIBFTDIR)libft.a
 # Object Files
 SRC_OBJ = $(SRC:.c=.o)
 BONUS_OBJ = $(BONUS_SRC:.c=.o)
-MAIN_OBJ = $(MAIN_SRC:.c=.o)
-TEST_OBJ = $(TEST_SRC:.c=.o)
 
 # Targets #
-all: $(NAME)	# Compile all project parts including bonus.
+all: $(NAME)	# Compile the entire project including bonus.
 
 $(NAME): $(LIBFT_SRC) $(SRC_OBJ) # Compile mandatory part.
-	$(CC) $(SRC_OBJ) $(MLX_SRC) $(LIBFT_SRC) $(CFLAGS) -o $(NAME)
+	$(CC) $(SRC_OBJ) $(LIBFT_SRC) $(COMPILE_OPTIONS) -o $(NAME)
 
 $(LIBFT_SRC): # Compile libft
-	$(MAKE) all -C libft/
+	$(MAKE) all -C $(LIBFTDIR)
 
 exes: $(NAME) clean # Compile all project parts including bonus clean up after compilation.
 
 # Compile .c to .o #
 %.o: %.c
-	$(CC) $^ $(COPTIONS) -o $@
+	$(CC) $^ $(COMPILE_FLAGS) -o $@
 
 # Checkers, Testers #
 
@@ -51,36 +43,21 @@ clean:	# Clean project folders, leave executables.
 	rm -f $(BONUS_OBJ)
 	rm -f $(TEST_OBJ)
   ifeq ("$(wildcard $(LIBFTDIR))", "")
-	echo "libft: Directory does not exist."
+	@echo "libft: Directory does not exist."
   else
 	$(MAKE) fclean -C libft/
-	echo "libft folder cleaned"
+	@echo "libft folder cleaned"
   endif
 
 fclean: clean	# Fully clean project folders.
-	rm -f $(NAME) $(MAIN_NAME) $(BONUS_NAME)
-	echo "\"$(NAME)\" deleted"
+	rm -f $(NAME) $(BONUS_NAME)
+	@echo "\"$(NAME)\" deleted"
 
 re: fclean	# Recompile whole project.
 	$(MAKE) all
 
-name:
-	echo "$(NAME)"
-
-# help:
-# 	echo "Possible Commands:"
-# 	echo "all --> Compile whole project including bonus"
-# 	echo "name --> Display project name"
-# 	echo "exes --> Compile project and delete object files"
-# 	echo "help --> Display this help message"
-# 	echo "mlx --> Download mlx_linux library"
-# 	echo "dl_tester --> Download the tester"
-# 	echo "test --> Run all available tests"
-# 	echo "test --> run all available tests"
-# 	echo "clean --> Delete all object files"
-# 	echo "fclean --> Delete everything besides source files"
-# 	echo "re --> recompile everything (fclean, all)"
-# 	echo "libft --> Compile libft and copy libft.h and libft.a to project folder"
+name: # print project name # 
+	@echo "$(NAME)"
 
 help:	# Print this helpful message
 	@awk 'BEGIN { \
