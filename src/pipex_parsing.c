@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:21:53 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 15:10:57 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 15:57:44 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ int	ft_parse_cmds(t_pipex *pipex)
 	else
 		pipex->infile = ft_strdup(pipex->argv[1]);
 	i = -1;
-	if (ft_alloc_t_pipex(pipex) == -1 || (!pipex->infile && pipex->mode != here_doc)
+	if (ft_alloc_t_pipex(pipex) == -1 || (!pipex->infile && pipex->mode != 2)
 		|| (pipex->mode == here_doc && pipex->delimiter == NULL))
 		return (313);
 	while (++i < pipex->nb_cmds)

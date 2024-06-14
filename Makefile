@@ -18,7 +18,7 @@ COPTIONS = -g3 -Werror -Wall -Wextra -O0 -c
 # ADD SEARCHFLAGS FOR LIBFT ,...
 CC = cc
 # Source Files #
-SRC = src/pipex.c src/pipex_parsing.c src/pipex_utils.c src/pipex_error.c
+SRC = src/pipex.c src/pipex_parsing.c src/pipex_utils.c src/pipex_error.c src/pipex_here_doc.c
 HEADERS = pipex.h
 LIBFT_SRC = libft/libft.a
 # Object Files

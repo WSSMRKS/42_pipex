@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:52:06 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/12 12:42:40 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/14 16:06:48 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ int	ft_wait_error(t_pipex *pipex)
 
 	i = 0;
 	err = 0;
-	ft_printf_err("Entering the exitstatus loop\n");
 	while (i < pipex->nb_cmds)
 	{
 		pipex->child_ret[i] = 0;
@@ -72,7 +71,6 @@ int	ft_wait_error(t_pipex *pipex)
 		}
 		i++;
 	}
-	ft_printf_err("err is %d\n", err);
 	ft_cleanup(pipex);
 	exit(err);
 }
