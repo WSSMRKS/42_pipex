@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 20:26:16 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/15 17:27:25 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ int	main(int argc, char **argv, char **envp)
 	ft_init_env(&pipex, &argc, argv, envp);
 	ft_pipex_init(&pipex);
 	i = 0;
-	ft_fprintf(2, "nb_cmds == %d\n", pipex.nb_cmds);
 	ft_fork_first_child(&pipex, &i);
 	if (pipex.nb_cmds > 2)
 		ft_malcolm(&pipex, &i);
