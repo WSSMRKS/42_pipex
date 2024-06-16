@@ -4,8 +4,9 @@ HDRDIR = inc/
 LIBFTDIR = libft/
 # Names #
 NAME = pipex
+BONUS = pipex_bonus
 # Compiler & Compilation Flags #
-COMPILE_OPTIONS =  -g -Werror -Wall -Wextra -L./libft -lft 
+COMPILE_OPTIONS =  -g -Werror -Wall -Wextra -L./libft -lft
 # Detail on lft means including if libft was called blalibft the command would be -lblalibft it is searching for '.a' and '.so' files
 TESTFLAGS = -g3
 COMPILE_FLAGS = -g3 -I./inc -I./libft -Werror -Wall -Wextra -O0 -c
@@ -22,8 +23,12 @@ BONUS_OBJ = $(BONUS_SRC:.c=.o)
 
 # Targets #
 all: $(NAME)	# Compile the entire project including bonus.
+bonus: $(BONUS)	# Compile the bonus part of the project.
 
 $(NAME): $(LIBFT_SRC) $(SRC_OBJ) # Compile mandatory part.
+	$(CC) $(COMPILE_OPTIONS) $(SRC_OBJ) $(LIBFT_SRC) -o $(NAME)
+
+$(BONUS): $(LIBFT_SRC) $(SRC_OBJ) # Compile mandatory part.
 	$(CC) $(COMPILE_OPTIONS) $(SRC_OBJ) $(LIBFT_SRC) -o $(NAME)
 
 $(LIBFT_SRC): # Compile libft
@@ -51,13 +56,13 @@ clean:	# Clean project folders, leave executables.
   endif
 
 fclean: clean	# Fully clean project folders.
-	rm -f $(NAME) $(BONUS_NAME)
+	rm -f $(NAME) $(BONUS)
 	@echo "\"$(NAME)\" deleted"
 
 re: fclean	# Recompile whole project.
 	$(MAKE) all
 
-name: # print project name # 
+name: # print project name #
 	@echo "$(NAME)"
 
 help:	# Print this helpful message
