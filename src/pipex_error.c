@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 23:52:06 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 19:43:40 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/16 13:25:11 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ void	ft_errno_1_2_13(t_pipex *pipex, int i, int *err)
 	{
 		if (i == 0)
 			filename = pipex->infile;
+		else if (i == 0 && pipex->mode == here_doc)
+			filename = TEMP_FILE;
 		else
 		{
 			filename = pipex->outfile;

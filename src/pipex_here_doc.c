@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 15:54:59 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/14 19:31:02 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/16 13:27:18 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int	ft_here_doc_inp(t_pipex *pipex)
 	fdin = open(TEMP_FILE, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (fdin < 0)
 	{
-		ft_printf_err("Failed to open temporary file: %s\n", strerror(errno));
+		ft_printf_err("here_doc: Failed to open temporary file\n");
 		ft_cleanup_exit(pipex, errno);
 	}
 	buff = ft_get_next_line(0);
@@ -28,7 +28,6 @@ int	ft_here_doc_inp(t_pipex *pipex)
 		&& ft_strncmp(pipex->delimiter, buff, ft_strlen(pipex->delimiter)) != 0)
 	{
 		ft_fprintf(fdin, "%s", buff);
-		ft_fprintf(2, "%s", buff);
 		free(buff);
 		buff = ft_get_next_line(0);
 	}
@@ -58,9 +57,6 @@ void	ft_here_doc(t_pipex *pipex)
 	if (cmdpath == NULL)
 		err = 127;
 	else
-	{
 		err = execve(cmdpath, pipex->cmd_args[0], pipex->envp);
-		ft_printf_err("Command executed with error: %d\n", err);
-	}
 	ft_cleanup_exit(pipex, err);
 }

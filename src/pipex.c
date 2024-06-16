@@ -6,7 +6,7 @@
 /*   By: maweiss <maweiss@student.42berlin.de>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 13:47:54 by maweiss           #+#    #+#             */
-/*   Updated: 2024/06/15 17:27:25 by maweiss          ###   ########.fr       */
+/*   Updated: 2024/06/16 13:22:38 by maweiss          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,5 @@ int	main(int argc, char **argv, char **envp)
 	if (pipex.child_pids[i] == 0)
 		ft_parent_process(&pipex);
 	ft_close_all_fds(&pipex);
-	if (pipex.mode == here_doc)
-	{
-		unlink(TEMP_FILE);
-		if (!access(TEMP_FILE, F_OK))
-			ft_printf_err("pipex: could not delete tempfile\n");
-	}
 	ft_wait_error(&pipex);
 }
