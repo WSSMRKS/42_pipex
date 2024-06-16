@@ -1,9 +1,0 @@
-[submodule "42_libft"]
-	path = 42_libft
-	url = git@github.com:WSSMRKS/42_libft.git
-[submodule "libft"]
-	path = libft
-	url = git@github.com:WSSMRKS/42_libft.git
-[submodule "42_pipex_tester_michmos"]
-	path = 42_pipex_tester_michmos
-	url = git@github.com:WSSMRKS/42_pipex_tester_michmos.git
