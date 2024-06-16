@@ -29,7 +29,7 @@ $(NAME): $(LIBFT_SRC) $(SRC_OBJ) # Compile mandatory part.
 	$(CC) $(COMPILE_OPTIONS) $(SRC_OBJ) $(LIBFT_SRC) -o $(NAME)
 
 $(BONUS): $(LIBFT_SRC) $(SRC_OBJ) # Compile mandatory part.
-	$(CC) $(COMPILE_OPTIONS) $(SRC_OBJ) $(LIBFT_SRC) -o $(NAME)
+	$(CC) $(COMPILE_OPTIONS) $(SRC_OBJ) $(LIBFT_SRC) -o $(BONUS)
 
 $(LIBFT_SRC): # Compile libft
 	$(MAKE) all -C $(LIBFTDIR)
